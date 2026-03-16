@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ClarityCare — Senior Living Intelligence</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: Georgia, serif;
+            background: #0f1a17;
+            color: #e8e4de;
+            min-height: 100vh;
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 24px 48px;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .nav-logo-icon {
+            width: 32px; height: 32px;
+            background: #7ec8a0;
+            border-radius: 7px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 16px; color: #0f1a17;
+        }
+        .nav-logo-name {
+            font-size: 18px;
+            font-weight: 400;
+            color: white;
+            letter-spacing: -0.01em;
+        }
+        .nav-cta {
+            background: #7ec8a0;
+            color: #0f1a17;
+            border: none;
+            padding: 10px 22px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: Georgia, serif;
+            cursor: pointer;
+            font-weight: 400;
+            transition: background 0.2s;
+            text-decoration: none;
+        }
+        .nav-cta:hover { background: #6ab88e; }
+
+        .hero {
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 100px 48px 80px;
+            text-align: center;
+        }
+        .hero-badge {
+            display: inline-block;
+            background: rgba(126,200,160,0.1);
+            border: 1px solid rgba(126,200,160,0.3);
+            color: #7ec8a0;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            margin-bottom: 32px;
+        }
+        .hero h1 {
+            font-size: 52px;
+            font-weight: 400;
+            line-height: 1.15;
+            letter-spacing: -0.03em;
+            color: white;
+            margin-bottom: 24px;
+        }
+        .hero h1 span { color: #7ec8a0; }
+        .hero p {
+            font-size: 18px;
+            color: rgba(255,255,255,0.55);
+            line-height: 1.7;
+            max-width: 580px;
+            margin: 0 auto 48px;
+        }
+        .hero-buttons {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .btn-primary {
+            background: #7ec8a0;
+            color: #0f1a17;
+            border: none;
+            padding: 14px 32px;
+            border-radius: 10px;
+            font-size: 15px;
+            font-family: Georgia, serif;
+            cursor: pointer;
+            transition: background 0.2s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn-primary:hover { background: #6ab88e; }
+        .btn-secondary {
+            background: transparent;
+            color: rgba(255,255,255,0.7);
+            border: 1px solid rgba(255,255,255,0.15);
+            padding: 14px 32px;
+            border-radius: 10px;
+            font-size: 15px;
+            font-family: Georgia, serif;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn-secondary:hover {
+            border-color: rgba(255,255,255,0.3);
+            color: white;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 64px;
+            padding: 48px;
+            border-top: 1px solid rgba(255,255,255,0.06);
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            flex-wrap: wrap;
+        }
+        .stat { text-align: center; }
+        .stat-number {
+            font-size: 36px;
+            color: #7ec8a0;
+            letter-spacing: -0.03em;
+            display: block;
+        }
+        .stat-label {
+            font-size: 13px;
+            color: rgba(255,255,255,0.4);
+            margin-top: 4px;
+        }
+
+        .tools-section {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 80px 48px;
+        }
+        .section-label {
+            font-size: 11px;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: #7ec8a0;
+            margin-bottom: 16px;
+        }
+        .section-title {
+            font-size: 36px;
+            font-weight: 400;
+            color: white;
+            letter-spacing: -0.02em;
+            margin-bottom: 12px;
+        }
+        .section-subtitle {
+            font-size: 16px;
+            color: rgba(255,255,255,0.45);
+            margin-bottom: 48px;
+            max-width: 500px;
+        }
+
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 16px;
+        }
+        .tool-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 12px;
+            padding: 24px;
+            transition: all 0.2s;
+        }
+        .tool-card:hover {
+            background: rgba(255,255,255,0.05);
+            border-color: rgba(126,200,160,0.2);
+        }
+        .tool-icon { font-size: 24px; margin-bottom: 14px; }
+        .tool-name {
+            font-size: 15px;
+            color: white;
+            margin-bottom: 8px;
+            font-weight: 400;
+        }
+        .tool-desc {
+            font-size: 13px;
+            color: rgba(255,255,255,0.4);
+            line-height: 1.6;
+        }
+
+        .problem-section {
+            background: rgba(255,255,255,0.02);
+            border-top: 1px solid rgba(255,255,255,0.06);
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+        .problem-inner {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 80px 48px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 64px;
+            align-items: center;
+        }
+        @media (max-width: 680px) {
+            .problem-inner { grid-template-columns: 1fr; gap: 40px; }
+            .hero h1 { font-size: 36px; }
+            nav { padding: 20px 24px; }
+            .hero { padding: 60px 24px; }
+            .stats { gap: 32px; }
+        }
+        .problem-title {
+            font-size: 30px;
+            font-weight: 400;
+            color: white;
+            letter-spacing: -0.02em;
+            margin-bottom: 20px;
+            line-height: 1.3;
+        }
+        .problem-text {
+            font-size: 15px;
+            color: rgba(255,255,255,0.5);
+            line-height: 1.8;
+            margin-bottom: 16px;
+        }
+        .problem-stats {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .problem-stat {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 10px;
+            padding: 20px;
+        }
+        .problem-stat-number {
+            font-size: 28px;
+            color: #7ec8a0;
+            letter-spacing: -0.02em;
+        }
+        .problem-stat-text {
+            font-size: 13px;
+            color: rgba(255,255,255,0.45);
+            margin-top: 4px;
+        }
+
+        .cta-section {
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 100px 48px;
+            text-align: center;
+        }
+        .cta-title {
+            font-size: 40px;
+            font-weight: 400;
+            color: white;
+            letter-spacing: -0.02em;
+            margin-bottom: 16px;
+        }
+        .cta-subtitle {
+            font-size: 16px;
+            color: rgba(255,255,255,0.45);
+            margin-bottom: 40px;
+        }
+
+        footer {
+            border-top: 1px solid rgba(255,255,255,0.06);
+            padding: 32px 48px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+        footer span {
+            font-size: 13px;
+            color: rgba(255,255,255,0.25);
+        }
+    </style>
+</head>
+<body>
+
+<nav>
+    <div class="nav-logo">
+        <div class="nav-logo-icon">◈</div>
+        <span class="nav-logo-name">ClarityCare</span>
+    </div>
+    <a href="/app" class="nav-cta">Open App →</a>
+</nav>
+
+<section class="hero">
+    <div class="hero-badge">Senior Living Intelligence</div>
+    <h1>Less paperwork.<br><span>More care.</span></h1>
+    <p>ClarityCare automates the documentation, communication, and reporting that consumes your team's time — so they can focus on residents.</p>
+    <div class="hero-buttons">
+        <a href="/app" class="btn-primary">Try ClarityCare Free →</a>
+        <a href="#tools" class="btn-secondary">See the tools</a>
+    </div>
+</section>
+
+<div class="stats">
+    <div class="stat">
+        <span class="stat-number">8</span>
+        <div class="stat-label">AI-powered tools</div>
+    </div>
+    <div class="stat">
+        <span class="stat-number">~18hrs</span>
+        <div class="stat-label">saved per staff member per week</div>
+    </div>
+    <div class="stat">
+        <span class="stat-number">seconds</span>
+        <div class="stat-label">to generate any document</div>
+    </div>
+    <div class="stat">
+        <span class="stat-number">0</span>
+        <div class="stat-label">training required</div>
+    </div>
+</div>
+
+<section class="problem-section">
+    <div class="problem-inner">
+        <div>
+            <div class="section-label">The problem</div>
+            <h2 class="problem-title">Your staff didn't sign up to do paperwork.</h2>
+            <p class="problem-text">Senior living facilities are drowning in documentation. Incident reports, care plans, family updates, medication logs — every shift generates hours of writing that pulls caregivers away from residents.</p>
+            <p class="problem-text">ClarityCare uses AI to handle the writing. Your staff handles the care.</p>
+        </div>
+        <div class="problem-stats">
+            <div class="problem-stat">
+                <div class="problem-stat-number">40%</div>
+                <div class="problem-stat-text">of caregiver time spent on documentation, not direct care</div>
+            </div>
+            <div class="problem-stat">
+                <div class="problem-stat-number">30%+</div>
+                <div class="problem-stat-text">annual staff turnover rate in senior living</div>
+            </div>
+            <div class="problem-stat">
+                <div class="problem-stat-number">3hrs</div>
+                <div class="problem-stat-text">average time spent per shift on paperwork per nurse</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="tools-section" id="tools">
+    <div class="section-label">What it does</div>
+    <h2 class="section-title">Every tool your team needs.</h2>
+    <p class="section-subtitle">Built for the real workflows of senior living facilities — not generic AI.</p>
+
+    <div class="tools-grid">
+        <div class="tool-card">
+            <div class="tool-icon">💌</div>
+            <div class="tool-name">Family Update Generator</div>
+            <div class="tool-desc">Turn rough caregiver notes into warm, professional family emails in seconds.</div>
+        </div>
+        <div class="tool-card">
+            <div class="tool-icon">📋</div>
+            <div class="tool-name">Incident Report Generator</div>
+            <div class="tool-desc">Compliant, detailed incident reports from rough notes — ready for regulatory review.</div>
+        </div>
+        <div class="tool-card">
+            <div class="tool-icon">📅</div>
+            <div class="tool-name">Staff Scheduling Assistant</div>
+            <div class="tool-desc">Instant action plans for scheduling crises — with phone scripts and overtime warnings.</div>
+        </div>
+        <div class="tool-card">
+            <div class="tool-icon">🏠</div>
+            <div class="tool-name">Move-In Package Generator</div>
+            <div class="tool-desc">Welcome letters, family checklists, and day one schedules — personalized for every resident.</div>
+        </div>
+        <div class="tool-card">
+            <div class="tool-icon">💊</div>
+            <div class="tool-name">Medication Log Summarizer</div>
+            <div class="tool-desc">Clinical medication administration summaries from shift notes — with signature lines.</div>
+        </div>
+        <div class="tool-card">
+            <div class="tool-icon">📄</div>
+            <div class="tool-name">Care Plan Generator</div>
+            <div class="tool-desc">Comprehensive, CMS-compliant care plans from resident information and diagnoses.</div>
+        </div>
+        <div class="tool-card">
+            <div class="tool-icon">🚪</div>
+            <div class="tool-name">Discharge Summary Generator</div>
+            <div class="tool-desc">Complete discharge summaries for medical record transfer — clinical and thorough.</div>
+        </div>
+        <div class="tool-card">
+            <div class="tool-icon">🔍</div>
+            <div class="tool-name">Prospect Research</div>
+            <div class="tool-desc">Pre-call intel, talking points, and discovery questions for any senior living company.</div>
+        </div>
+    </div>
+</section>
+
+<section class="cta-section">
+    <h2 class="cta-title">Ready to give your staff their time back?</h2>
+    <p class="cta-subtitle">No setup. No training. Just open it and start generating.</p>
+    <a href="/app" class="btn-primary">Try ClarityCare Free →</a>
+</section>
+
+<footer>
+    <div class="nav-logo">
+        <div class="nav-logo-icon" style="width:24px;height:24px;font-size:12px;">◈</div>
+        <span style="font-size:14px;color:rgba(255,255,255,0.4);">ClarityCare</span>
+    </div>
+    <span>Senior Living Intelligence</span>
+</footer>
+
+</body>
+</html>
