@@ -3,22 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Tools for Senior Living</title>
+    <title>ClarityCare</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: Georgia, serif; background: #f5f3ef; color: #2c2c2c; }
 
         header {
-            background: #2c4a3e;
+            background: #1a2f2a;
             color: white;
-            padding: 20px 40px;
+            padding: 22px 40px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
         }
-        header h1 { font-size: 22px; font-weight: 400; }
-        header p { font-size: 13px; opacity: 0.7; margin-top: 4px; }
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .logo-icon {
+            width: 36px;
+            height: 36px;
+            background: #7ec8a0;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+        .logo-text h1 {
+            font-size: 22px;
+            font-weight: 400;
+            letter-spacing: -0.02em;
+        }
+        .logo-text span {
+            font-size: 12px;
+            opacity: 0.5;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
 
         .tabs {
             display: flex;
-            background: #1e3329;
+            background: #111f1c;
             padding: 0 24px;
             overflow-x: auto;
             scrollbar-width: none;
@@ -27,14 +54,14 @@
         .tab {
             padding: 12px 18px;
             cursor: pointer;
-            color: rgba(255,255,255,0.6);
+            color: rgba(255,255,255,0.5);
             font-size: 13px;
-            border-bottom: 3px solid transparent;
+            border-bottom: 2px solid transparent;
             white-space: nowrap;
             transition: all 0.2s;
             user-select: none;
         }
-        .tab:hover { color: white; }
+        .tab:hover { color: rgba(255,255,255,0.8); }
         .tab.active { color: white; border-bottom-color: #7ec8a0; }
 
         .container { max-width: 780px; margin: 32px auto; padding: 0 20px; }
@@ -46,30 +73,33 @@
             background: white;
             border-radius: 12px;
             padding: 28px;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+            box-shadow: 0 1px 4px rgba(0,0,0,0.06);
             margin-bottom: 24px;
         }
-        .card h2 { font-size: 19px; font-weight: 400; margin-bottom: 6px; }
-        .card .description { font-size: 13px; color: #888; margin-bottom: 22px; }
+        .card-header { margin-bottom: 20px; }
+        .card-header h2 { font-size: 19px; font-weight: 400; margin-bottom: 4px; }
+        .card-header p { font-size: 13px; color: #999; }
 
         .form-group { margin-bottom: 16px; }
         label {
             display: block;
-            font-size: 12px;
-            color: #555;
+            font-size: 11px;
+            color: #888;
             margin-bottom: 5px;
             text-transform: uppercase;
-            letter-spacing: 0.05em;
+            letter-spacing: 0.06em;
         }
+        .required { color: #e74c3c; }
         input, textarea {
             width: 100%;
             padding: 10px 14px;
-            border: 1px solid #e0ddd8;
+            border: 1px solid #e8e4de;
             border-radius: 8px;
             font-size: 14px;
             font-family: Georgia, serif;
             background: #fafaf8;
             transition: border 0.2s, background 0.2s;
+            color: #2c2c2c;
         }
         input:focus, textarea:focus {
             outline: none;
@@ -77,14 +107,13 @@
             background: white;
         }
         textarea { min-height: 90px; resize: vertical; }
+        .char-count { font-size: 11px; color: #bbb; margin-top: 4px; text-align: right; }
 
         .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
         @media (max-width: 540px) { .form-row { grid-template-columns: 1fr; } }
 
-        .btn-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 4px; }
-
         .btn {
-            background: #2c4a3e;
+            background: #1a2f2a;
             color: white;
             border: none;
             padding: 11px 24px;
@@ -93,11 +122,41 @@
             font-family: Georgia, serif;
             cursor: pointer;
             transition: background 0.2s;
+            margin-top: 4px;
         }
-        .btn:hover { background: #1e3329; }
-        .btn:disabled { background: #aaa; cursor: not-allowed; }
+        .btn:hover { background: #111f1c; }
 
-        .char-count { font-size: 12px; color: #aaa; margin-top: 4px; }
+        .loading {
+            display: none;
+            align-items: center;
+            gap: 10px;
+            font-size: 13px;
+            color: #999;
+            font-style: italic;
+            margin-top: 16px;
+        }
+        .loading.visible { display: flex; }
+        .spinner {
+            width: 15px; height: 15px;
+            border: 2px solid #ddd;
+            border-top-color: #1a2f2a;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            flex-shrink: 0;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .error-box {
+            background: #fff5f5;
+            border: 1px solid #ffd0d0;
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin-top: 14px;
+            font-size: 13px;
+            color: #c0392b;
+            display: none;
+        }
+        .error-box.visible { display: block; }
 
         .output-box {
             margin-top: 20px;
@@ -109,11 +168,10 @@
         .output-box.visible { display: block; }
 
         .output-toolbar {
-            background: #f0ede8;
+            background: #f5f3ef;
             padding: 10px 16px;
             display: flex;
             gap: 8px;
-            align-items: center;
             border-bottom: 1px solid #e8e4de;
         }
         .tool-btn {
@@ -123,58 +181,26 @@
             border-radius: 6px;
             font-size: 12px;
             cursor: pointer;
-            color: #444;
+            color: #555;
             transition: background 0.15s;
+            font-family: Georgia, serif;
         }
-        .tool-btn:hover { background: #f5f5f5; }
+        .tool-btn:hover { background: #f0ede8; }
 
         .output-content {
-            padding: 20px;
+            padding: 22px;
             white-space: pre-wrap;
             font-size: 14px;
-            line-height: 1.8;
+            line-height: 1.85;
             background: white;
-            max-height: 500px;
+            max-height: 520px;
             overflow-y: auto;
+            color: #2c2c2c;
         }
-
-        .error-box {
-            background: #fff5f5;
-            border: 1px solid #ffd0d0;
-            border-radius: 8px;
-            padding: 14px 18px;
-            margin-top: 16px;
-            font-size: 14px;
-            color: #c0392b;
-            display: none;
-        }
-        .error-box.visible { display: block; }
-
-        .loading {
-            display: none;
-            align-items: center;
-            gap: 10px;
-            font-size: 13px;
-            color: #888;
-            font-style: italic;
-            margin-top: 16px;
-        }
-        .loading.visible { display: flex; }
-
-        .spinner {
-            width: 16px;
-            height: 16px;
-            border: 2px solid #ddd;
-            border-top-color: #2c4a3e;
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-        }
-        @keyframes spin { to { transform: rotate(360deg); } }
-
-        .required-star { color: #e74c3c; margin-left: 2px; }
 
         @media print {
-            header, .tabs, .btn-row, .output-toolbar, .form-group, .card .description { display: none !important; }
+            header, .tabs, .btn, .output-toolbar, .form-group,
+            .card-header p, .loading, .error-box { display: none !important; }
             .card { box-shadow: none; padding: 0; }
             .output-box { border: none; display: block !important; }
             .output-content { max-height: none; padding: 0; }
@@ -184,8 +210,13 @@
 <body>
 
 <header>
-    <h1>AI Tools for Senior Living</h1>
-    <p>Powered by Claude AI · Built by Matt French</p>
+    <div class="logo">
+        <div class="logo-icon">◈</div>
+        <div class="logo-text">
+            <h1>ClarityCare</h1>
+            <span>Senior Living Intelligence</span>
+        </div>
+    </div>
 </header>
 
 <div class="tabs">
@@ -193,6 +224,9 @@
     <div class="tab" onclick="showTab('incident', this)">📋 Incident Report</div>
     <div class="tab" onclick="showTab('scheduling', this)">📅 Scheduling</div>
     <div class="tab" onclick="showTab('movein', this)">🏠 Move-In</div>
+    <div class="tab" onclick="showTab('medication', this)">💊 Medication Log</div>
+    <div class="tab" onclick="showTab('careplan', this)">📄 Care Plan</div>
+    <div class="tab" onclick="showTab('discharge', this)">🚪 Discharge</div>
     <div class="tab" onclick="showTab('research', this)">🔍 Research</div>
 </div>
 
@@ -201,25 +235,25 @@
     <!-- Family Update -->
     <div class="tool-panel active" id="panel-family">
         <div class="card">
-            <h2>Family Update Generator</h2>
-            <p class="description">Turn rough caregiver notes into a warm, professional family email in seconds.</p>
+            <div class="card-header">
+                <h2>Family Update Generator</h2>
+                <p>Turn rough caregiver notes into a warm, professional family email in seconds.</p>
+            </div>
             <div class="form-group">
-                <label>Resident Name <span class="required-star">*</span></label>
+                <label>Resident Name <span class="required">*</span></label>
                 <input type="text" id="fu-resident" placeholder="e.g. Margaret Johnson" maxlength="100">
             </div>
             <div class="form-group">
-                <label>Caregiver Notes <span class="required-star">*</span></label>
-                <textarea id="fu-notes" placeholder="e.g. margaret ate good today, did bingo, seemed tired after lunch..." maxlength="2000" oninput="updateCount(this, 'fu-count')"></textarea>
-                <div class="char-count"><span id="fu-count">0</span>/2000 characters</div>
+                <label>Caregiver Notes <span class="required">*</span></label>
+                <textarea id="fu-notes" placeholder="e.g. margaret ate good today, did bingo, seemed tired after lunch, took meds no problem..." maxlength="2000" oninput="updateCount(this, 'fu-count')"></textarea>
+                <div class="char-count"><span id="fu-count">0</span> / 2000</div>
             </div>
-            <div class="btn-row">
-                <button class="btn" onclick="generate('family-update', {resident_name: val('fu-resident'), notes: val('fu-notes')}, 'fu')">Generate Email</button>
-            </div>
+            <button class="btn" onclick="generate('family-update', {resident_name: val('fu-resident'), notes: val('fu-notes')}, 'fu')">Generate Email</button>
             <div class="loading" id="fu-loading"><div class="spinner"></div>Generating family update...</div>
             <div class="error-box" id="fu-error"></div>
             <div class="output-box" id="fu-output-box">
                 <div class="output-toolbar">
-                    <button class="tool-btn" onclick="copyOutput('fu-content')">📋 Copy</button>
+                    <button class="tool-btn" onclick="copyOutput('fu-content', this)">📋 Copy</button>
                     <button class="tool-btn" onclick="window.print()">🖨️ Print</button>
                 </div>
                 <div class="output-content" id="fu-content"></div>
@@ -230,31 +264,31 @@
     <!-- Incident Report -->
     <div class="tool-panel" id="panel-incident">
         <div class="card">
-            <h2>Incident Report Generator</h2>
-            <p class="description">Turn rough notes into a fully compliant incident report ready for regulatory review.</p>
+            <div class="card-header">
+                <h2>Incident Report Generator</h2>
+                <p>Turn rough notes into a fully compliant incident report ready for regulatory review.</p>
+            </div>
             <div class="form-row">
                 <div class="form-group">
-                    <label>Resident Name <span class="required-star">*</span></label>
+                    <label>Resident Name <span class="required">*</span></label>
                     <input type="text" id="ir-resident" placeholder="e.g. Dorothy Williams" maxlength="100">
                 </div>
                 <div class="form-group">
-                    <label>Staff Name <span class="required-star">*</span></label>
+                    <label>Staff Name <span class="required">*</span></label>
                     <input type="text" id="ir-staff" placeholder="e.g. Sarah Johnson" maxlength="100">
                 </div>
             </div>
             <div class="form-group">
-                <label>What Happened <span class="required-star">*</span></label>
+                <label>What Happened <span class="required">*</span></label>
                 <textarea id="ir-notes" placeholder="Describe the incident in your own words..." maxlength="2000" oninput="updateCount(this, 'ir-count')"></textarea>
-                <div class="char-count"><span id="ir-count">0</span>/2000 characters</div>
+                <div class="char-count"><span id="ir-count">0</span> / 2000</div>
             </div>
-            <div class="btn-row">
-                <button class="btn" onclick="generate('incident-report', {resident_name: val('ir-resident'), staff_name: val('ir-staff'), notes: val('ir-notes')}, 'ir')">Generate Report</button>
-            </div>
+            <button class="btn" onclick="generate('incident-report', {resident_name: val('ir-resident'), staff_name: val('ir-staff'), notes: val('ir-notes')}, 'ir')">Generate Report</button>
             <div class="loading" id="ir-loading"><div class="spinner"></div>Generating incident report...</div>
             <div class="error-box" id="ir-error"></div>
             <div class="output-box" id="ir-output-box">
                 <div class="output-toolbar">
-                    <button class="tool-btn" onclick="copyOutput('ir-content')">📋 Copy</button>
+                    <button class="tool-btn" onclick="copyOutput('ir-content', this)">📋 Copy</button>
                     <button class="tool-btn" onclick="window.print()">🖨️ Print</button>
                 </div>
                 <div class="output-content" id="ir-content"></div>
@@ -265,25 +299,25 @@
     <!-- Scheduling -->
     <div class="tool-panel" id="panel-scheduling">
         <div class="card">
-            <h2>Staff Scheduling Assistant</h2>
-            <p class="description">Describe your scheduling crisis and get an immediate action plan with a phone script.</p>
+            <div class="card-header">
+                <h2>Staff Scheduling Assistant</h2>
+                <p>Describe your scheduling crisis and get an immediate action plan with a phone script.</p>
+            </div>
             <div class="form-group">
-                <label>Facility Name <span class="required-star">*</span></label>
+                <label>Facility Name <span class="required">*</span></label>
                 <input type="text" id="ss-facility" placeholder="e.g. Sunrise Gardens" maxlength="100">
             </div>
             <div class="form-group">
-                <label>Describe the Problem <span class="required-star">*</span></label>
+                <label>Describe the Problem <span class="required">*</span></label>
                 <textarea id="ss-problem" placeholder="e.g. Night shift CNA called out sick at 10pm, we have 24 residents..." maxlength="2000" oninput="updateCount(this, 'ss-count')"></textarea>
-                <div class="char-count"><span id="ss-count">0</span>/2000 characters</div>
+                <div class="char-count"><span id="ss-count">0</span> / 2000</div>
             </div>
-            <div class="btn-row">
-                <button class="btn" onclick="generate('staff-scheduling', {facility_name: val('ss-facility'), problem: val('ss-problem')}, 'ss')">Get Action Plan</button>
-            </div>
+            <button class="btn" onclick="generate('staff-scheduling', {facility_name: val('ss-facility'), problem: val('ss-problem')}, 'ss')">Get Action Plan</button>
             <div class="loading" id="ss-loading"><div class="spinner"></div>Analyzing scheduling problem...</div>
             <div class="error-box" id="ss-error"></div>
             <div class="output-box" id="ss-output-box">
                 <div class="output-toolbar">
-                    <button class="tool-btn" onclick="copyOutput('ss-content')">📋 Copy</button>
+                    <button class="tool-btn" onclick="copyOutput('ss-content', this)">📋 Copy</button>
                     <button class="tool-btn" onclick="window.print()">🖨️ Print</button>
                 </div>
                 <div class="output-content" id="ss-content"></div>
@@ -294,51 +328,51 @@
     <!-- Move In -->
     <div class="tool-panel" id="panel-movein">
         <div class="card">
-            <h2>Move-In Package Generator</h2>
-            <p class="description">Generate a complete move-in package — welcome letter, family checklist, and day one schedule.</p>
+            <div class="card-header">
+                <h2>Move-In Package Generator</h2>
+                <p>Generate a complete move-in package — welcome letter, family checklist, and day one schedule.</p>
+            </div>
             <div class="form-row">
                 <div class="form-group">
-                    <label>Facility Name <span class="required-star">*</span></label>
+                    <label>Facility Name <span class="required">*</span></label>
                     <input type="text" id="mi-facility" placeholder="e.g. Sunrise Gardens" maxlength="100">
                 </div>
                 <div class="form-group">
-                    <label>Resident Name <span class="required-star">*</span></label>
+                    <label>Resident Name <span class="required">*</span></label>
                     <input type="text" id="mi-resident" placeholder="e.g. Eleanor Davis" maxlength="100">
                 </div>
             </div>
             <div class="form-row">
                 <div class="form-group">
-                    <label>Room Number <span class="required-star">*</span></label>
+                    <label>Room Number <span class="required">*</span></label>
                     <input type="text" id="mi-room" placeholder="e.g. 114" maxlength="20">
                 </div>
                 <div class="form-group">
-                    <label>Move-In Date <span class="required-star">*</span></label>
+                    <label>Move-In Date <span class="required">*</span></label>
                     <input type="text" id="mi-date" placeholder="e.g. March 20, 2026" maxlength="50">
                 </div>
             </div>
             <div class="form-row">
                 <div class="form-group">
-                    <label>Care Level <span class="required-star">*</span></label>
+                    <label>Care Level <span class="required">*</span></label>
                     <input type="text" id="mi-care" placeholder="e.g. Assisted Living" maxlength="50">
                 </div>
                 <div class="form-group">
-                    <label>Family Contact <span class="required-star">*</span></label>
+                    <label>Family Contact <span class="required">*</span></label>
                     <input type="text" id="mi-family" placeholder="e.g. Susan Davis (daughter)" maxlength="100">
                 </div>
             </div>
             <div class="form-group">
                 <label>Notes about this resident</label>
-                <textarea id="mi-notes" placeholder="e.g. Loves gardening, nervous about transition..." maxlength="1000" oninput="updateCount(this, 'mi-count')"></textarea>
-                <div class="char-count"><span id="mi-count">0</span>/1000 characters</div>
+                <textarea id="mi-notes" placeholder="e.g. Loves gardening, nervous about transition, has a cat named Mittens..." maxlength="1000" oninput="updateCount(this, 'mi-count')"></textarea>
+                <div class="char-count"><span id="mi-count">0</span> / 1000</div>
             </div>
-            <div class="btn-row">
-                <button class="btn" onclick="generate('move-in', {facility_name: val('mi-facility'), resident_name: val('mi-resident'), room_number: val('mi-room'), move_in_date: val('mi-date'), care_level: val('mi-care'), family_contact: val('mi-family'), notes: val('mi-notes')}, 'mi')">Generate Package</button>
-            </div>
+            <button class="btn" onclick="generate('move-in', {facility_name: val('mi-facility'), resident_name: val('mi-resident'), room_number: val('mi-room'), move_in_date: val('mi-date'), care_level: val('mi-care'), family_contact: val('mi-family'), notes: val('mi-notes')}, 'mi')">Generate Package</button>
             <div class="loading" id="mi-loading"><div class="spinner"></div>Generating move-in package...</div>
             <div class="error-box" id="mi-error"></div>
             <div class="output-box" id="mi-output-box">
                 <div class="output-toolbar">
-                    <button class="tool-btn" onclick="copyOutput('mi-content')">📋 Copy</button>
+                    <button class="tool-btn" onclick="copyOutput('mi-content', this)">📋 Copy</button>
                     <button class="tool-btn" onclick="window.print()">🖨️ Print</button>
                 </div>
                 <div class="output-content" id="mi-content"></div>
@@ -346,23 +380,135 @@
         </div>
     </div>
 
+    <!-- Medication Log -->
+    <div class="tool-panel" id="panel-medication">
+        <div class="card">
+            <div class="card-header">
+                <h2>Medication Log Summarizer</h2>
+                <p>Turn shift medication notes into a formal, compliant medication administration summary.</p>
+            </div>
+            <div class="form-group">
+                <label>Resident Name <span class="required">*</span></label>
+                <input type="text" id="ml-resident" placeholder="e.g. Robert Chen" maxlength="100">
+            </div>
+            <div class="form-group">
+                <label>Medications Given <span class="required">*</span></label>
+                <textarea id="ml-medications" placeholder="e.g. Lisinopril 10mg oral 8am, Metformin 500mg oral 8am, refused Aspirin, Melatonin 5mg oral 9pm..." maxlength="2000" oninput="updateCount(this, 'ml-med-count')"></textarea>
+                <div class="char-count"><span id="ml-med-count">0</span> / 2000</div>
+            </div>
+            <div class="form-group">
+                <label>Nurse Notes <span class="required">*</span></label>
+                <textarea id="ml-notes" placeholder="e.g. resident cooperative, no side effects noted, complained of mild nausea after metformin..." maxlength="1000" oninput="updateCount(this, 'ml-note-count')"></textarea>
+                <div class="char-count"><span id="ml-note-count">0</span> / 1000</div>
+            </div>
+            <button class="btn" onclick="generate('medication-log', {resident_name: val('ml-resident'), medications: val('ml-medications'), notes: val('ml-notes')}, 'ml')">Generate Summary</button>
+            <div class="loading" id="ml-loading"><div class="spinner"></div>Generating medication summary...</div>
+            <div class="error-box" id="ml-error"></div>
+            <div class="output-box" id="ml-output-box">
+                <div class="output-toolbar">
+                    <button class="tool-btn" onclick="copyOutput('ml-content', this)">📋 Copy</button>
+                    <button class="tool-btn" onclick="window.print()">🖨️ Print</button>
+                </div>
+                <div class="output-content" id="ml-content"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Care Plan -->
+    <div class="tool-panel" id="panel-careplan">
+        <div class="card">
+            <div class="card-header">
+                <h2>Care Plan Generator</h2>
+                <p>Generate a comprehensive, CMS-compliant care plan from resident information.</p>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Resident Name <span class="required">*</span></label>
+                    <input type="text" id="cp-resident" placeholder="e.g. Helen Martinez" maxlength="100">
+                </div>
+                <div class="form-group">
+                    <label>Primary Diagnosis <span class="required">*</span></label>
+                    <input type="text" id="cp-diagnosis" placeholder="e.g. Dementia, Type 2 Diabetes, CHF" maxlength="200">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Identified Care Needs <span class="required">*</span></label>
+                <textarea id="cp-needs" placeholder="e.g. needs assistance with ADLs, fall risk, requires diabetic diet, family involved in care decisions..." maxlength="2000" oninput="updateCount(this, 'cp-count')"></textarea>
+                <div class="char-count"><span id="cp-count">0</span> / 2000</div>
+            </div>
+            <div class="form-group">
+                <label>Additional Notes</label>
+                <input type="text" id="cp-notes" placeholder="e.g. resident speaks Spanish, prefers female caregivers" maxlength="300">
+            </div>
+            <button class="btn" onclick="generate('care-plan', {resident_name: val('cp-resident'), diagnosis: val('cp-diagnosis'), care_needs: val('cp-needs'), notes: val('cp-notes')}, 'cp')">Generate Care Plan</button>
+            <div class="loading" id="cp-loading"><div class="spinner"></div>Generating care plan...</div>
+            <div class="error-box" id="cp-error"></div>
+            <div class="output-box" id="cp-output-box">
+                <div class="output-toolbar">
+                    <button class="tool-btn" onclick="copyOutput('cp-content', this)">📋 Copy</button>
+                    <button class="tool-btn" onclick="window.print()">🖨️ Print</button>
+                </div>
+                <div class="output-content" id="cp-content"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Discharge Summary -->
+    <div class="tool-panel" id="panel-discharge">
+        <div class="card">
+            <div class="card-header">
+                <h2>Discharge Summary Generator</h2>
+                <p>Generate a complete discharge summary for medical record transfer.</p>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Resident Name <span class="required">*</span></label>
+                    <input type="text" id="ds-resident" placeholder="e.g. Frank Thompson" maxlength="100">
+                </div>
+                <div class="form-group">
+                    <label>Discharge Destination <span class="required">*</span></label>
+                    <input type="text" id="ds-destination" placeholder="e.g. Home with family, Hospital, Skilled Nursing" maxlength="100">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Summary of Stay <span class="required">*</span></label>
+                <textarea id="ds-summary" placeholder="e.g. Resident admitted Jan 5 following hip replacement, completed PT, regained mobility, family trained on home care..." maxlength="2000" oninput="updateCount(this, 'ds-count')"></textarea>
+                <div class="char-count"><span id="ds-count">0</span> / 2000</div>
+            </div>
+            <div class="form-group">
+                <label>Additional Notes</label>
+                <input type="text" id="ds-notes" placeholder="e.g. follow-up with orthopedic surgeon scheduled March 25" maxlength="300">
+            </div>
+            <button class="btn" onclick="generate('discharge-summary', {resident_name: val('ds-resident'), discharge_destination: val('ds-destination'), stay_summary: val('ds-summary'), notes: val('ds-notes')}, 'ds')">Generate Summary</button>
+            <div class="loading" id="ds-loading"><div class="spinner"></div>Generating discharge summary...</div>
+            <div class="error-box" id="ds-error"></div>
+            <div class="output-box" id="ds-output-box">
+                <div class="output-toolbar">
+                    <button class="tool-btn" onclick="copyOutput('ds-content', this)">📋 Copy</button>
+                    <button class="tool-btn" onclick="window.print()">🖨️ Print</button>
+                </div>
+                <div class="output-content" id="ds-content"></div>
+            </div>
+        </div>
+    </div>
+
     <!-- Research -->
     <div class="tool-panel" id="panel-research">
         <div class="card">
-            <h2>Prospect Research</h2>
-            <p class="description">Get instant talking points and discovery questions before any sales call.</p>
+            <div class="card-header">
+                <h2>Prospect Research</h2>
+                <p>Get instant talking points and discovery questions before any sales call.</p>
+            </div>
             <div class="form-group">
-                <label>Company Name <span class="required-star">*</span></label>
+                <label>Company Name <span class="required">*</span></label>
                 <input type="text" id="re-company" placeholder="e.g. Brookdale Senior Living" maxlength="100">
             </div>
-            <div class="btn-row">
-                <button class="btn" onclick="generate('research', {company: val('re-company')}, 're')">Research Company</button>
-            </div>
+            <button class="btn" onclick="generate('research', {company: val('re-company')}, 're')">Research Company</button>
             <div class="loading" id="re-loading"><div class="spinner"></div>Researching company...</div>
             <div class="error-box" id="re-error"></div>
             <div class="output-box" id="re-output-box">
                 <div class="output-toolbar">
-                    <button class="tool-btn" onclick="copyOutput('re-content')">📋 Copy</button>
+                    <button class="tool-btn" onclick="copyOutput('re-content', this)">📋 Copy</button>
                     <button class="tool-btn" onclick="window.print()">🖨️ Print</button>
                 </div>
                 <div class="output-content" id="re-content"></div>
@@ -394,7 +540,6 @@
         const outputBox = document.getElementById(prefix + '-output-box');
         const content = document.getElementById(prefix + '-content');
 
-        // Validate required fields
         for (const [key, value] of Object.entries(data)) {
             if (key === 'notes') continue;
             if (!value) {
@@ -415,7 +560,6 @@
                 body: JSON.stringify(data)
             });
             const result = await response.json();
-
             if (result.error) {
                 errorBox.textContent = result.error;
                 errorBox.classList.add('visible');
@@ -432,11 +576,11 @@
         }
     }
 
-    async function copyOutput(contentId) {
+    async function copyOutput(contentId, btn) {
         const text = document.getElementById(contentId).textContent;
         await navigator.clipboard.writeText(text);
-        event.target.textContent = '✅ Copied!';
-        setTimeout(() => event.target.textContent = '📋 Copy', 2000);
+        btn.textContent = '✅ Copied!';
+        setTimeout(() => btn.textContent = '📋 Copy', 2000);
     }
 </script>
 
