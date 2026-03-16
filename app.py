@@ -6,9 +6,31 @@ import os
 from flask import Flask, request, jsonify, render_template
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
+from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 
 app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///claritycare.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+db = SQLAlchemy(app)
+
+class Document(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    tool = db.Column(db.String(50), nullable=False)
+    resident_name = db.Column(db.String(100))
+    facility_name = db.Column(db.String(100))
+    content = db.Column(db.Text, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'tool': self.tool,
+            'resident_name': self.resident_name,
+            'facility_name': self.facility_name,
+            'content': self.content[:100] + '...' if len(self.content) > 100 else self.content,
+            'created_at': self.created_at.strftime('%b %d, %Y %I:%M %p')
+        }
 
 limiter = Limiter(
     get_remote_address,
@@ -189,7 +211,7 @@ def research():
     valid, error = validate(data, ["company"])
     if not valid:
         return jsonify({"error": error}), 400
-    prompt = f"""I have a sales call with {data['company']} today. I sell ClarityCare — AI automation tools built specifically for senior living facilities.
+    prompt = f"""I have a sales call with {data['company']} today. I sell ClarityCare - AI automation tools built specifically for senior living facilities.
 
 Research this company and give me:
 
@@ -271,28 +293,13 @@ Resident: {data['resident_name']}
 Date: {datetime.now().strftime("%B %d, %Y")}
 
 1. MEDICAL DIAGNOSES & CONDITIONS
-List all conditions with clinical descriptions.
-
 2. CARE GOALS (90-day)
-3-5 specific, measurable goals for this resident.
-
 3. NURSING INTERVENTIONS
-Specific daily actions staff must take. Frequency and method for each.
-
 4. DIETARY REQUIREMENTS
-Meal plans, restrictions, hydration goals, dining assistance needed.
-
 5. MOBILITY & ACTIVITY PLAN
-Physical activity level, fall risk assessment, assistive devices needed.
-
 6. PSYCHOSOCIAL NEEDS
-Emotional support, social activities, family involvement plan.
-
 7. SAFETY MEASURES
-Specific safety protocols for this resident's conditions.
-
 8. FAMILY COMMUNICATION PLAN
-How and how often to update the family.
 
 Use professional clinical language compliant with CMS guidelines."""
     return jsonify({"result": ask_claude(prompt)})
@@ -319,25 +326,12 @@ Discharge Date: {datetime.now().strftime("%B %d, %Y")}
 Discharge Destination: {data['discharge_destination']}
 
 1. REASON FOR ADMISSION
-Why the resident originally came to the facility.
-
 2. SUMMARY OF STAY
-Key events, treatments, and progress during their time at the facility.
-
 3. CURRENT HEALTH STATUS AT DISCHARGE
-Physical and cognitive status at time of discharge.
-
 4. MEDICATIONS AT DISCHARGE
-Complete medication list with doses and instructions.
-
 5. FOLLOW-UP CARE REQUIRED
-Appointments, therapies, or treatments needed after discharge.
-
 6. INSTRUCTIONS FOR RECEIVING FACILITY OR FAMILY
-Specific care instructions, warnings, and preferences.
-
 7. EMERGENCY CONTACTS
-Key contacts if issues arise after discharge.
 
 Use formal clinical language suitable for medical record transfer."""
     return jsonify({"result": ask_claude(prompt)})
@@ -386,6 +380,46 @@ def stream():
                                headers={"Cache-Control": "no-cache",
                                         "X-Accel-Buffering": "no"})
 
+@app.route("/api/save-document", methods=["POST"])
+@limiter.limit("30 per minute")
+def save_document():
+    data = request.json
+    if not data.get("content") or not data.get("tool"):
+        return jsonify({"error": "Missing required fields"}), 400
+    doc = Document(
+        tool=data.get("tool"),
+        resident_name=data.get("resident_name", ""),
+        facility_name=data.get("facility_name", ""),
+        content=data.get("content")
+    )
+    db.session.add(doc)
+    db.session.commit()
+    return jsonify({"success": True, "id": doc.id})
+
+@app.route("/api/documents", methods=["GET"])
+def get_documents():
+    docs = Document.query.order_by(Document.created_at.desc()).limit(50).all()
+    return jsonify([d.to_dict() for d in docs])
+
+@app.route("/api/documents/<int:doc_id>", methods=["GET"])
+def get_document(doc_id):
+    doc = Document.query.get_or_404(doc_id)
+    return jsonify({
+        'id': doc.id,
+        'tool': doc.tool,
+        'resident_name': doc.resident_name,
+        'facility_name': doc.facility_name,
+        'content': doc.content,
+        'created_at': doc.created_at.strftime('%b %d, %Y %I:%M %p')
+    })
+
+@app.route("/api/documents/<int:doc_id>", methods=["DELETE"])
+def delete_document(doc_id):
+    doc = Document.query.get_or_404(doc_id)
+    db.session.delete(doc)
+    db.session.commit()
+    return jsonify({"success": True})
+
 @app.errorhandler(429)
 def rate_limit_exceeded(e):
     return jsonify({"error": "Too many requests. Please wait a moment and try again."}), 429
@@ -393,6 +427,9 @@ def rate_limit_exceeded(e):
 @app.errorhandler(500)
 def server_error(e):
     return jsonify({"error": "Something went wrong. Please try again."}), 500
+
+with app.app_context():
+    db.create_all()
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
