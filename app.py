@@ -338,6 +338,50 @@ Key contacts if issues arise after discharge.
 Use formal clinical language suitable for medical record transfer."""
     return jsonify({"result": ask_claude(prompt)})
 
+@app.route("/api/stream", methods=["POST"])
+@limiter.limit("10 per minute")
+def stream():
+    data = request.json
+    prompt = data.get("prompt", "")
+    if not prompt:
+        return jsonify({"error": "No prompt provided"}), 400
+
+    def generate():
+        url = "https://api.anthropic.com/v1/messages"
+        payload = json.dumps({
+            "model": "claude-sonnet-4-20250514",
+            "max_tokens": 2048,
+            "stream": True,
+            "messages": [{"role": "user", "content": prompt}]
+        }).encode()
+        req = urllib.request.Request(url, data=payload, headers={
+            "Content-Type": "application/json",
+            "x-api-key": API_KEY,
+            "anthropic-version": "2023-06-01"
+        })
+        try:
+            with urllib.request.urlopen(req) as response:
+                for line in response:
+                    line = line.decode("utf-8").strip()
+                    if line.startswith("data:"):
+                        line = line[5:].strip()
+                        if line == "[DONE]":
+                            break
+                        try:
+                            event = json.loads(line)
+                            if event.get("type") == "content_block_delta":
+                                text = event["delta"].get("text", "")
+                                if text:
+                                    yield f"data: {json.dumps({'text': text})}\n\n"
+                        except json.JSONDecodeError:
+                            continue
+        except Exception as e:
+            yield f"data: {json.dumps({'error': str(e)})}\n\n"
+
+    return app.response_class(generate(), mimetype="text/event-stream",
+                               headers={"Cache-Control": "no-cache",
+                                        "X-Accel-Buffering": "no"})
+
 @app.errorhandler(429)
 def rate_limit_exceeded(e):
     return jsonify({"error": "Too many requests. Please wait a moment and try again."}), 429
