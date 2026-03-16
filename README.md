@@ -1,42 +1,47 @@
 # AI Tools for Senior Living
 
-A collection of AI-powered automation tools built to reduce administrative burden 
-for senior living facility staff — freeing them up to focus on resident care.
+A collection of AI-powered automation tools built to eliminate administrative 
+burden for senior living facility staff — freeing them to focus on resident care.
 
 Built by Matt French — Sales professional turned AI automation builder.
+Specializing in senior living operations.
 
 ---
 
 ## Tools
 
-### 🔍 Prospect Research Tool (`research.py`)
-Before any sales call, type in a company name and instantly get:
-- Company overview and biggest challenges
-- 3 tailored talking points
-- 3 smart discovery questions
-
-**Run it:**
-```
-py research.py
-```
+### 🔍 Prospect Research (`research.py`)
+Before any sales call, type a company name and instantly get a company 
+overview, their biggest challenges, tailored talking points, and smart 
+discovery questions.
 
 ### 💌 Family Update Generator (`family_update.py`)
-Paste in rough caregiver notes and instantly get a warm, professional 
-family update email — in seconds instead of 15 minutes.
+Paste rough caregiver notes and get a warm, professional family update 
+email in seconds — instead of 15 minutes.
 
-**Run it:**
-```
-py family_update.py
-```
+### 📋 Incident Report Generator (`incident_report.py`)
+Paste rough notes about an incident and get a fully compliant, 
+professional incident report ready for regulatory review. Auto-saves 
+to file.
+
+### 📅 Staff Scheduling Assistant (`staff_scheduling.py`)
+Describe a scheduling crisis and get an immediate action plan — who to 
+call, what to say, overtime warnings, and a word-for-word phone script.
+
+### 🏠 Move-In Package Generator (`move_in.py`)
+Enter a new resident's details and instantly generate a complete move-in 
+package: personalized welcome letter, family checklist, and day one 
+schedule.
 
 ---
 
 ## Why I Built This
 
-Senior living facilities are understaffed and overwhelmed with administrative work. 
-Caregivers spend hours writing emails, reports, and documentation instead of 
-caring for residents. These tools use AI to handle the repetitive writing tasks 
-so staff can focus on what matters.
+Senior living facilities are critically understaffed. Caregivers and 
+administrators spend hours on documentation, communication, and paperwork 
+instead of caring for residents. These tools use AI to handle the 
+repetitive writing and decision-making tasks so staff can focus on 
+what matters most — the people in their care.
 
 ---
 
@@ -51,13 +56,21 @@ ANTHROPIC_API_KEY=your-key-here
 ```
 py -m pip install python-dotenv
 ```
-4. Run any tool with `py filename.py`
+4. Run any tool:
+```
+py research.py
+py family_update.py
+py incident_report.py
+py staff_scheduling.py
+py move_in.py
+```
 
 ---
 
 ## What's Next
 
-- Incident report generator
-- Medication log summarizer  
-- Move-in welcome letter automation
+- Medication log summarizer
+- Billing and occupancy tracker  
+- Care plan documentation
 - Web interface for non-technical staff
+- Workato integration for full automation
