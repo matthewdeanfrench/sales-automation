@@ -6,13 +6,7 @@
     <title>ClarityCare — Senior Living Intelligence</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        
-        body {
-            font-family: Georgia, serif;
-            background: #0f1a17;
-            color: #e8e4de;
-            min-height: 100vh;
-        }
+        body { font-family: Georgia, serif; background: #0f1a17; color: #e8e4de; min-height: 100vh; }
 
         nav {
             display: flex;
@@ -21,11 +15,7 @@
             padding: 24px 48px;
             border-bottom: 1px solid rgba(255,255,255,0.06);
         }
-        .nav-logo {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
+        .nav-logo { display: flex; align-items: center; gap: 10px; }
         .nav-logo-icon {
             width: 32px; height: 32px;
             background: #7ec8a0;
@@ -33,175 +23,79 @@
             display: flex; align-items: center; justify-content: center;
             font-size: 16px; color: #0f1a17;
         }
-        .nav-logo-name {
-            font-size: 18px;
-            font-weight: 400;
-            color: white;
-            letter-spacing: -0.01em;
-        }
+        .nav-logo-name { font-size: 18px; font-weight: 400; color: white; letter-spacing: -0.01em; }
         .nav-cta {
-            background: #7ec8a0;
-            color: #0f1a17;
-            border: none;
-            padding: 10px 22px;
-            border-radius: 8px;
-            font-size: 14px;
-            font-family: Georgia, serif;
-            cursor: pointer;
-            font-weight: 400;
-            transition: background 0.2s;
-            text-decoration: none;
+            background: #7ec8a0; color: #0f1a17; border: none;
+            padding: 10px 22px; border-radius: 8px; font-size: 14px;
+            font-family: Georgia, serif; cursor: pointer;
+            transition: background 0.2s; text-decoration: none;
         }
         .nav-cta:hover { background: #6ab88e; }
 
         .hero {
-            max-width: 860px;
-            margin: 0 auto;
-            padding: 100px 48px 80px;
-            text-align: center;
+            max-width: 860px; margin: 0 auto;
+            padding: 100px 48px 80px; text-align: center;
         }
         .hero-badge {
             display: inline-block;
             background: rgba(126,200,160,0.1);
             border: 1px solid rgba(126,200,160,0.3);
-            color: #7ec8a0;
-            padding: 6px 16px;
-            border-radius: 20px;
-            font-size: 12px;
-            letter-spacing: 0.1em;
-            text-transform: uppercase;
-            margin-bottom: 32px;
+            color: #7ec8a0; padding: 6px 16px; border-radius: 20px;
+            font-size: 12px; letter-spacing: 0.1em;
+            text-transform: uppercase; margin-bottom: 32px;
         }
         .hero h1 {
-            font-size: 52px;
-            font-weight: 400;
-            line-height: 1.15;
-            letter-spacing: -0.03em;
-            color: white;
-            margin-bottom: 24px;
+            font-size: 52px; font-weight: 400; line-height: 1.15;
+            letter-spacing: -0.03em; color: white; margin-bottom: 24px;
         }
         .hero h1 span { color: #7ec8a0; }
         .hero p {
-            font-size: 18px;
-            color: rgba(255,255,255,0.55);
-            line-height: 1.7;
-            max-width: 580px;
+            font-size: 18px; color: rgba(255,255,255,0.55);
+            line-height: 1.7; max-width: 580px;
             margin: 0 auto 48px;
         }
-        .hero-buttons {
-            display: flex;
-            gap: 16px;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
+        .hero-buttons { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
         .btn-primary {
-            background: #7ec8a0;
-            color: #0f1a17;
-            border: none;
-            padding: 14px 32px;
-            border-radius: 10px;
-            font-size: 15px;
-            font-family: Georgia, serif;
-            cursor: pointer;
-            transition: background 0.2s;
-            text-decoration: none;
-            display: inline-block;
+            background: #7ec8a0; color: #0f1a17; border: none;
+            padding: 14px 32px; border-radius: 10px; font-size: 15px;
+            font-family: Georgia, serif; cursor: pointer;
+            transition: background 0.2s; text-decoration: none; display: inline-block;
         }
         .btn-primary:hover { background: #6ab88e; }
         .btn-secondary {
-            background: transparent;
-            color: rgba(255,255,255,0.7);
+            background: transparent; color: rgba(255,255,255,0.7);
             border: 1px solid rgba(255,255,255,0.15);
-            padding: 14px 32px;
-            border-radius: 10px;
-            font-size: 15px;
-            font-family: Georgia, serif;
-            cursor: pointer;
-            transition: all 0.2s;
-            text-decoration: none;
-            display: inline-block;
+            padding: 14px 32px; border-radius: 10px; font-size: 15px;
+            font-family: Georgia, serif; cursor: pointer;
+            transition: all 0.2s; text-decoration: none; display: inline-block;
         }
-        .btn-secondary:hover {
-            border-color: rgba(255,255,255,0.3);
-            color: white;
-        }
+        .btn-secondary:hover { border-color: rgba(255,255,255,0.3); color: white; }
 
         .stats {
-            display: flex;
-            justify-content: center;
-            gap: 64px;
-            padding: 48px;
+            display: flex; justify-content: center; gap: 64px;
+            padding: 48px; flex-wrap: wrap;
             border-top: 1px solid rgba(255,255,255,0.06);
             border-bottom: 1px solid rgba(255,255,255,0.06);
-            flex-wrap: wrap;
         }
         .stat { text-align: center; }
-        .stat-number {
-            font-size: 36px;
-            color: #7ec8a0;
-            letter-spacing: -0.03em;
-            display: block;
-        }
-        .stat-label {
-            font-size: 13px;
-            color: rgba(255,255,255,0.4);
-            margin-top: 4px;
-        }
+        .stat-number { font-size: 36px; color: #7ec8a0; letter-spacing: -0.03em; display: block; }
+        .stat-label { font-size: 13px; color: rgba(255,255,255,0.4); margin-top: 4px; }
 
-        .tools-section {
-            max-width: 1000px;
-            margin: 0 auto;
-            padding: 80px 48px;
-        }
-        .section-label {
-            font-size: 11px;
-            letter-spacing: 0.2em;
-            text-transform: uppercase;
-            color: #7ec8a0;
-            margin-bottom: 16px;
-        }
-        .section-title {
-            font-size: 36px;
-            font-weight: 400;
-            color: white;
-            letter-spacing: -0.02em;
-            margin-bottom: 12px;
-        }
-        .section-subtitle {
-            font-size: 16px;
-            color: rgba(255,255,255,0.45);
-            margin-bottom: 48px;
-            max-width: 500px;
-        }
+        .tools-section { max-width: 1000px; margin: 0 auto; padding: 80px 48px; }
+        .section-label { font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: #7ec8a0; margin-bottom: 16px; }
+        .section-title { font-size: 36px; font-weight: 400; color: white; letter-spacing: -0.02em; margin-bottom: 12px; }
+        .section-subtitle { font-size: 16px; color: rgba(255,255,255,0.45); margin-bottom: 48px; max-width: 500px; }
 
-        .tools-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 16px;
-        }
+        .tools-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
         .tool-card {
             background: rgba(255,255,255,0.03);
             border: 1px solid rgba(255,255,255,0.07);
-            border-radius: 12px;
-            padding: 24px;
-            transition: all 0.2s;
+            border-radius: 12px; padding: 24px; transition: all 0.2s;
         }
-        .tool-card:hover {
-            background: rgba(255,255,255,0.05);
-            border-color: rgba(126,200,160,0.2);
-        }
+        .tool-card:hover { background: rgba(255,255,255,0.05); border-color: rgba(126,200,160,0.2); }
         .tool-icon { font-size: 24px; margin-bottom: 14px; }
-        .tool-name {
-            font-size: 15px;
-            color: white;
-            margin-bottom: 8px;
-            font-weight: 400;
-        }
-        .tool-desc {
-            font-size: 13px;
-            color: rgba(255,255,255,0.4);
-            line-height: 1.6;
-        }
+        .tool-name { font-size: 15px; color: white; margin-bottom: 8px; font-weight: 400; }
+        .tool-desc { font-size: 13px; color: rgba(255,255,255,0.4); line-height: 1.6; }
 
         .problem-section {
             background: rgba(255,255,255,0.02);
@@ -209,88 +103,79 @@
             border-bottom: 1px solid rgba(255,255,255,0.06);
         }
         .problem-inner {
-            max-width: 1000px;
-            margin: 0 auto;
-            padding: 80px 48px;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 64px;
-            align-items: center;
+            max-width: 1000px; margin: 0 auto; padding: 80px 48px;
+            display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center;
         }
-        @media (max-width: 680px) {
-            .problem-inner { grid-template-columns: 1fr; gap: 40px; }
-            .hero h1 { font-size: 36px; }
-            nav { padding: 20px 24px; }
-            .hero { padding: 60px 24px; }
-            .stats { gap: 32px; }
-        }
-        .problem-title {
-            font-size: 30px;
-            font-weight: 400;
-            color: white;
-            letter-spacing: -0.02em;
-            margin-bottom: 20px;
-            line-height: 1.3;
-        }
-        .problem-text {
-            font-size: 15px;
-            color: rgba(255,255,255,0.5);
-            line-height: 1.8;
-            margin-bottom: 16px;
-        }
-        .problem-stats {
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-        }
+        .problem-title { font-size: 30px; font-weight: 400; color: white; letter-spacing: -0.02em; margin-bottom: 20px; line-height: 1.3; }
+        .problem-text { font-size: 15px; color: rgba(255,255,255,0.5); line-height: 1.8; margin-bottom: 16px; }
+        .problem-stats { display: flex; flex-direction: column; gap: 16px; }
         .problem-stat {
             background: rgba(255,255,255,0.03);
             border: 1px solid rgba(255,255,255,0.07);
-            border-radius: 10px;
-            padding: 20px;
+            border-radius: 10px; padding: 20px;
         }
-        .problem-stat-number {
-            font-size: 28px;
-            color: #7ec8a0;
-            letter-spacing: -0.02em;
+        .problem-stat-number { font-size: 28px; color: #7ec8a0; letter-spacing: -0.02em; }
+        .problem-stat-text { font-size: 13px; color: rgba(255,255,255,0.45); margin-top: 4px; }
+
+        .pricing-section { max-width: 1000px; margin: 0 auto; padding: 80px 48px; }
+        .pricing-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 20px; }
+        .pricing-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 14px; padding: 32px; position: relative;
         }
-        .problem-stat-text {
-            font-size: 13px;
-            color: rgba(255,255,255,0.45);
-            margin-top: 4px;
+        .pricing-card-featured { background: rgba(126,200,160,0.06); border-color: rgba(126,200,160,0.25); }
+        .pricing-badge {
+            position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+            background: #7ec8a0; color: #0f1a17; font-size: 11px;
+            padding: 4px 14px; border-radius: 20px; white-space: nowrap;
+        }
+        .pricing-tier { font-size: 13px; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 12px; }
+        .pricing-price { font-size: 42px; color: white; letter-spacing: -0.03em; margin-bottom: 12px; }
+        .pricing-price span { font-size: 16px; color: rgba(255,255,255,0.4); }
+        .pricing-desc { font-size: 13px; color: rgba(255,255,255,0.4); margin-bottom: 24px; line-height: 1.6; }
+        .pricing-features { list-style: none; margin-bottom: 32px; display: flex; flex-direction: column; gap: 10px; }
+        .pricing-features li { font-size: 13px; color: rgba(255,255,255,0.6); }
+        .pricing-btn {
+            display: block; text-align: center; padding: 11px; border-radius: 8px;
+            font-size: 14px; font-family: Georgia, serif; text-decoration: none;
+            border: 1px solid rgba(255,255,255,0.15); color: rgba(255,255,255,0.7); transition: all 0.2s;
+        }
+        .pricing-btn:hover { border-color: rgba(255,255,255,0.3); color: white; }
+        .pricing-btn-featured { background: #7ec8a0; color: #0f1a17; border-color: transparent; }
+        .pricing-btn-featured:hover { background: #6ab88e; color: #0f1a17; }
+
+        .contact-section {
+            background: rgba(255,255,255,0.02);
+            border-top: 1px solid rgba(255,255,255,0.06);
+        }
+        .contact-inner {
+            max-width: 1000px; margin: 0 auto; padding: 80px 48px;
+            display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: start;
+        }
+        .contact-form-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 16px; padding: 32px;
         }
 
-        .cta-section {
-            max-width: 700px;
-            margin: 0 auto;
-            padding: 100px 48px;
-            text-align: center;
-        }
-        .cta-title {
-            font-size: 40px;
-            font-weight: 400;
-            color: white;
-            letter-spacing: -0.02em;
-            margin-bottom: 16px;
-        }
-        .cta-subtitle {
-            font-size: 16px;
-            color: rgba(255,255,255,0.45);
-            margin-bottom: 40px;
-        }
+        .cta-section { max-width: 700px; margin: 0 auto; padding: 100px 48px; text-align: center; }
+        .cta-title { font-size: 40px; font-weight: 400; color: white; letter-spacing: -0.02em; margin-bottom: 16px; }
+        .cta-subtitle { font-size: 16px; color: rgba(255,255,255,0.45); margin-bottom: 40px; }
 
         footer {
             border-top: 1px solid rgba(255,255,255,0.06);
             padding: 32px 48px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 16px;
+            display: flex; justify-content: space-between; align-items: center;
+            flex-wrap: wrap; gap: 16px;
         }
-        footer span {
-            font-size: 13px;
-            color: rgba(255,255,255,0.25);
+        footer span { font-size: 13px; color: rgba(255,255,255,0.25); }
+
+        @media (max-width: 680px) {
+            .problem-inner, .contact-inner { grid-template-columns: 1fr; gap: 40px; }
+            .hero h1 { font-size: 36px; }
+            nav, .hero, .tools-section, .pricing-section { padding-left: 24px; padding-right: 24px; }
+            .stats { gap: 32px; }
         }
     </style>
 </head>
@@ -362,7 +247,6 @@
     <div class="section-label">What it does</div>
     <h2 class="section-title">Every tool your team needs.</h2>
     <p class="section-subtitle">Built for the real workflows of senior living facilities — not generic AI.</p>
-
     <div class="tools-grid">
         <div class="tool-card">
             <div class="tool-icon">💌</div>
@@ -407,6 +291,106 @@
     </div>
 </section>
 
+<section class="pricing-section" id="pricing">
+    <div class="section-label" style="text-align:center">Pricing</div>
+    <h2 class="section-title" style="text-align:center">Simple, transparent pricing.</h2>
+    <p class="section-subtitle" style="text-align:center;margin:0 auto 48px;">No contracts. No setup fees. Cancel anytime.</p>
+    <div class="pricing-grid">
+        <div class="pricing-card">
+            <div class="pricing-tier">Starter</div>
+            <div class="pricing-price">$299<span>/mo</span></div>
+            <div class="pricing-desc">For small facilities getting started with AI automation.</div>
+            <ul class="pricing-features">
+                <li>✓ Up to 30 residents</li>
+                <li>✓ All 8 AI tools</li>
+                <li>✓ Unlimited document generation</li>
+                <li>✓ Print & export</li>
+                <li>✓ Email support</li>
+            </ul>
+            <a href="#contact" class="pricing-btn">Get Started</a>
+        </div>
+        <div class="pricing-card pricing-card-featured">
+            <div class="pricing-badge">Most Popular</div>
+            <div class="pricing-tier">Professional</div>
+            <div class="pricing-price">$599<span>/mo</span></div>
+            <div class="pricing-desc">For growing facilities that need more power and customization.</div>
+            <ul class="pricing-features">
+                <li>✓ Unlimited residents</li>
+                <li>✓ All 8 AI tools</li>
+                <li>✓ Facility branding on documents</li>
+                <li>✓ Document history & retrieval</li>
+                <li>✓ Priority support</li>
+                <li>✓ Staff accounts</li>
+            </ul>
+            <a href="#contact" class="pricing-btn pricing-btn-featured">Get Started</a>
+        </div>
+        <div class="pricing-card">
+            <div class="pricing-tier">Enterprise</div>
+            <div class="pricing-price">Custom</div>
+            <div class="pricing-desc">For multi-facility operators who need enterprise-grade solutions.</div>
+            <ul class="pricing-features">
+                <li>✓ Multiple facilities</li>
+                <li>✓ Custom AI training</li>
+                <li>✓ API access</li>
+                <li>✓ Dedicated account manager</li>
+                <li>✓ SLA guarantee</li>
+                <li>✓ Custom integrations</li>
+            </ul>
+            <a href="#contact" class="pricing-btn">Contact Us</a>
+        </div>
+    </div>
+</section>
+
+<section class="contact-section" id="contact">
+    <div class="contact-inner">
+        <div>
+            <div class="section-label">Get in touch</div>
+            <h2 class="section-title">See ClarityCare in action.</h2>
+            <p class="problem-text">Book a 15-minute demo and we'll show you exactly how ClarityCare fits into your facility's workflow.</p>
+            <div style="margin-top:32px;display:flex;flex-direction:column;gap:16px;">
+                <div style="display:flex;align-items:center;gap:12px;color:rgba(255,255,255,0.5);font-size:14px;"><span style="color:#7ec8a0">✓</span> Free 15-minute demo</div>
+                <div style="display:flex;align-items:center;gap:12px;color:rgba(255,255,255,0.5);font-size:14px;"><span style="color:#7ec8a0">✓</span> No commitment required</div>
+                <div style="display:flex;align-items:center;gap:12px;color:rgba(255,255,255,0.5);font-size:14px;"><span style="color:#7ec8a0">✓</span> Live walkthrough of all 8 tools</div>
+                <div style="display:flex;align-items:center;gap:12px;color:rgba(255,255,255,0.5);font-size:14px;"><span style="color:#7ec8a0">✓</span> Answers to your specific questions</div>
+            </div>
+        </div>
+        <div class="contact-form-card">
+            <div id="form-success" style="display:none;text-align:center;padding:40px 0;">
+                <div style="font-size:40px;margin-bottom:16px;">✓</div>
+                <div style="color:white;font-size:18px;margin-bottom:8px;">Thanks! We'll be in touch shortly.</div>
+                <div style="color:rgba(255,255,255,0.45);font-size:14px;">Expect a response within 24 hours.</div>
+            </div>
+            <div id="contact-form">
+                <h3 style="color:white;font-size:18px;font-weight:400;margin-bottom:24px;">Request a demo</h3>
+                <div style="margin-bottom:16px;">
+                    <label style="display:block;font-size:11px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">Your Name</label>
+                    <input type="text" id="contact-name" placeholder="Jane Smith" style="width:100%;padding:10px 14px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:white;font-size:14px;font-family:Georgia,serif;">
+                </div>
+                <div style="margin-bottom:16px;">
+                    <label style="display:block;font-size:11px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">Email Address</label>
+                    <input type="email" id="contact-email" placeholder="jane@facilityname.com" style="width:100%;padding:10px 14px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:white;font-size:14px;font-family:Georgia,serif;">
+                </div>
+                <div style="margin-bottom:16px;">
+                    <label style="display:block;font-size:11px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">Facility Name</label>
+                    <input type="text" id="contact-facility" placeholder="Sunrise Gardens Senior Living" style="width:100%;padding:10px 14px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:white;font-size:14px;font-family:Georgia,serif;">
+                </div>
+                <div style="margin-bottom:24px;">
+                    <label style="display:block;font-size:11px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">Number of Residents</label>
+                    <select id="contact-size" style="width:100%;padding:10px 14px;background:#1a2f2a;border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:white;font-size:14px;font-family:Georgia,serif;">
+                        <option value="">Select size</option>
+                        <option value="1-30">1-30 residents</option>
+                        <option value="31-100">31-100 residents</option>
+                        <option value="100+">100+ residents</option>
+                        <option value="multiple">Multiple facilities</option>
+                    </select>
+                </div>
+                <button onclick="submitContact()" style="width:100%;background:#7ec8a0;color:#0f1a17;border:none;padding:12px;border-radius:8px;font-size:15px;font-family:Georgia,serif;cursor:pointer;">Request Demo →</button>
+                <div id="contact-error" style="display:none;color:#ff6b6b;font-size:13px;margin-top:12px;text-align:center;"></div>
+            </div>
+        </div>
+    </div>
+</section>
+
 <section class="cta-section">
     <h2 class="cta-title">Ready to give your staff their time back?</h2>
     <p class="cta-subtitle">No setup. No training. Just open it and start generating.</p>
@@ -420,6 +404,25 @@
     </div>
     <span>Senior Living Intelligence</span>
 </footer>
+
+<script>
+    function submitContact() {
+        const name = document.getElementById('contact-name').value.trim();
+        const email = document.getElementById('contact-email').value.trim();
+        const facility = document.getElementById('contact-facility').value.trim();
+        const size = document.getElementById('contact-size').value;
+        const errorBox = document.getElementById('contact-error');
+
+        if (!name || !email || !facility || !size) {
+            errorBox.textContent = 'Please fill in all fields.';
+            errorBox.style.display = 'block';
+            return;
+        }
+
+        document.getElementById('contact-form').style.display = 'none';
+        document.getElementById('form-success').style.display = 'block';
+    }
+</script>
 
 </body>
 </html>
