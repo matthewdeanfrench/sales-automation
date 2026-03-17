@@ -121,6 +121,7 @@
         <div class="tab" onclick="showTab('staffing', this)">🔮 Staffing AI</div>
         <div class="tab" onclick="showTab('survey', this)">📊 Survey Prep</div>
         <div class="tab" onclick="showTab('risk', this)">🧠 Risk Assessment</div>
+        <div class="tab" onclick="showTab('voice', this)">🎤 Voice Notes</div>
         <div class="tab" onclick="showTab('research', this)">🔍 Research</div>
     </div>
 
@@ -511,6 +512,51 @@
             </div>
         </div>
 
+<!-- Voice Notes -->
+        <div class="tool-panel" id="panel-voice">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Voice to Documentation</h2>
+                    <p>Speak your notes — AI converts them into a formal clinical document instantly.</p>
+                </div>
+
+                <div class="form-group">
+                    <label>Document Type <span class="required">*</span></label>
+                    <select id="voice-doc-type" style="width:100%;padding:10px 14px;border:1px solid #e8e4de;border-radius:8px;font-size:14px;font-family:Georgia,serif;background:#fafaf8;color:#2c2c2c;">
+                        <option value="care-note">Care Note</option>
+                        <option value="incident">Incident Report</option>
+                        <option value="family-update">Family Update</option>
+                        <option value="medication">Medication Note</option>
+                        <option value="behavior">Behavioral Observation</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Resident Name</label>
+                    <input type="text" id="voice-resident" placeholder="e.g. Margaret Johnson" maxlength="100">
+                </div>
+
+                <div style="background:#f0f9ff;border:1px solid #bae6fd;border-radius:12px;padding:24px;text-align:center;margin-bottom:20px;">
+                    <div id="voice-status" style="font-size:14px;color:#0369a1;margin-bottom:16px;">Click the microphone to start recording</div>
+                    <button id="voice-btn" onclick="toggleRecording()" style="width:80px;height:80px;border-radius:50%;background:#1a2f2a;border:none;cursor:pointer;font-size:32px;transition:all 0.2s;display:flex;align-items:center;justify-content:center;margin:0 auto;">🎤</button>
+                    <div id="voice-timer" style="font-size:24px;color:#1a2f2a;margin-top:12px;font-weight:400;display:none;">0:00</div>
+                    <div id="voice-transcript" style="margin-top:16px;padding:12px;background:white;border-radius:8px;font-size:13px;color:#444;min-height:60px;text-align:left;border:1px solid #e8e4de;display:none;"></div>
+                </div>
+
+                <button class="btn" id="voice-generate-btn" onclick="generateFromVoice()" style="display:none;">Generate Document from Recording</button>
+                <div class="loading" id="voice-loading"><div class="spinner"></div>Converting speech to clinical document...</div>
+                <div class="error-box" id="voice-error"></div>
+                <div class="output-box" id="voice-output-box">
+                    <div class="output-toolbar">
+                        <button class="tool-btn" onclick="copyOut('voice-content', this)">📋 Copy</button>
+                        <button class="tool-btn" onclick="window.print()">🖨️ Print</button>
+                        <button class="tool-btn" id="voice-save-btn" onclick="saveDoc('care-note', val('voice-resident'), '', 'voice-content', 'voice-save-btn')">💾 Save</button>
+                    </div>
+                    <div class="output-content" id="voice-content"></div>
+                </div>
+            </div>
+        </div>
+
         <!-- Research -->
         <div class="tool-panel" id="panel-research">
             <div class="card">
@@ -800,6 +846,178 @@ async function publishToFamily() {
             status.style.color = '#c0392b';
         }
         status.style.display = 'block';
+    }
+
+let recognition = null;
+    let isRecording = false;
+    let transcript = '';
+    let timerInterval = null;
+    let seconds = 0;
+
+    function toggleRecording() {
+        if (isRecording) {
+            stopRecording();
+        } else {
+            startRecording();
+        }
+    }
+
+    function startRecording() {
+        if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+            document.getElementById('voice-error').textContent = 'Voice recording requires Chrome browser.';
+            document.getElementById('voice-error').classList.add('visible');
+            return;
+        }
+
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        recognition = new SpeechRecognition();
+        recognition.continuous = true;
+        recognition.interimResults = true;
+        recognition.lang = 'en-US';
+
+        transcript = '';
+        isRecording = true;
+        seconds = 0;
+
+        const btn = document.getElementById('voice-btn');
+        const status = document.getElementById('voice-status');
+        const timer = document.getElementById('voice-timer');
+        const transcriptDiv = document.getElementById('voice-transcript');
+        const generateBtn = document.getElementById('voice-generate-btn');
+
+        btn.style.background = '#dc2626';
+        btn.innerHTML = '⏹';
+        status.textContent = 'Recording... speak your notes clearly';
+        status.style.color = '#dc2626';
+        timer.style.display = 'block';
+        transcriptDiv.style.display = 'block';
+        generateBtn.style.display = 'none';
+
+        timerInterval = setInterval(() => {
+            seconds++;
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            timer.textContent = `${mins}:${secs.toString().padStart(2, '0')}`;
+        }, 1000);
+
+        recognition.onresult = (event) => {
+            let interim = '';
+            let final = '';
+            for (let i = event.resultIndex; i < event.results.length; i++) {
+                if (event.results[i].isFinal) {
+                    final += event.results[i][0].transcript + ' ';
+                } else {
+                    interim += event.results[i][0].transcript;
+                }
+            }
+            transcript += final;
+            transcriptDiv.textContent = transcript + interim;
+        };
+
+        recognition.onerror = (event) => {
+            document.getElementById('voice-error').textContent = `Recording error: ${event.error}. Try again.`;
+            document.getElementById('voice-error').classList.add('visible');
+            stopRecording();
+        };
+
+        recognition.start();
+    }
+
+    function stopRecording() {
+        isRecording = false;
+        if (recognition) recognition.stop();
+        if (timerInterval) clearInterval(timerInterval);
+
+        const btn = document.getElementById('voice-btn');
+        const status = document.getElementById('voice-status');
+        const generateBtn = document.getElementById('voice-generate-btn');
+
+        btn.style.background = '#1a2f2a';
+        btn.innerHTML = '🎤';
+
+        if (transcript.trim()) {
+            status.textContent = `Recording complete — ${seconds} seconds captured`;
+            status.style.color = '#16a34a';
+            generateBtn.style.display = 'block';
+        } else {
+            status.textContent = 'No speech detected. Try again.';
+            status.style.color = '#dc2626';
+        }
+    }
+
+    async function generateFromVoice() {
+        const docType = document.getElementById('voice-doc-type').value;
+        const resident = document.getElementById('voice-resident').value.trim();
+        const loading = document.getElementById('voice-loading');
+        const errorBox = document.getElementById('voice-error');
+        const outputBox = document.getElementById('voice-output-box');
+        const content = document.getElementById('voice-content');
+
+        if (!transcript.trim()) {
+            errorBox.textContent = 'No recording found. Please record first.';
+            errorBox.classList.add('visible');
+            return;
+        }
+
+        const docTypeLabels = {
+            'care-note': 'care note',
+            'incident': 'incident report',
+            'family-update': 'family update email',
+            'medication': 'medication administration note',
+            'behavior': 'behavioral observation note'
+        };
+
+        const prompt = `You are a senior living clinical documentation specialist.
+
+A caregiver spoke these notes about ${resident || 'a resident'}:
+"${transcript}"
+
+Convert this spoken note into a formal ${docTypeLabels[docType]} suitable for the medical record.
+Fix any speech-to-text errors, use proper clinical terminology, add structure and formatting.
+Make it professional and complete. Include date: ${new Date().toLocaleDateString()}.`;
+
+        loading.classList.add('visible');
+        errorBox.classList.remove('visible');
+        outputBox.classList.remove('visible');
+        content.textContent = '';
+
+        try {
+            const response = await fetch('/api/stream', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ prompt })
+            });
+
+            outputBox.classList.add('visible');
+            loading.classList.remove('visible');
+            outputBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+            let buffer = '';
+
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+                buffer += decoder.decode(value, { stream: true });
+                const lines = buffer.split('\n');
+                buffer = lines.pop();
+                for (const line of lines) {
+                    if (line.startsWith('data:')) {
+                        const jsonStr = line.slice(5).trim();
+                        if (!jsonStr) continue;
+                        try {
+                            const event = JSON.parse(jsonStr);
+                            if (event.text) content.textContent += event.text;
+                        } catch {}
+                    }
+                }
+            }
+        } catch (err) {
+            loading.classList.remove('visible');
+            errorBox.textContent = 'Connection error. Please try again.';
+            errorBox.classList.add('visible');
+        }
     }
 
 async function runRiskAssessment() {
