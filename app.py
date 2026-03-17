@@ -3,13 +3,15 @@ load_dotenv()
 import urllib.request
 import json
 import os
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify, render_template, redirect
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from flask_sqlalchemy import SQLAlchemy
+from flask_login import login_required, current_user
 from datetime import datetime
 
 app = Flask(__name__)
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-secret-change-in-production')
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///claritycare.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
@@ -70,15 +72,21 @@ def validate(data, required_fields):
             return False, f"Missing required field: {field}"
     return True, None
 
+from auth import auth_bp, init_auth
+User = init_auth(app, db)
+app.register_blueprint(auth_bp)
+
 @app.route("/")
 def landing():
     return render_template("landing.html")
 
 @app.route("/app")
+@login_required
 def home():
     return render_template("index.html")
 
 @app.route("/api/family-update", methods=["POST"])
+@login_required
 @limiter.limit("10 per minute")
 def family_update():
     data = request.json
@@ -91,16 +99,18 @@ Caregiver notes for {data['resident_name']} today:
 {data['notes']}
 
 Write a warm, professional family update email that:
-- Opens with a personal, caring greeting
-- Summarizes how {data['resident_name']} is doing overall
-- Highlights specific positive moments from their day
-- Addresses any health or care notes in reassuring, non-alarming language
-- Closes warmly and invites the family to reach out
+- Opens with a personal, caring greeting using the resident's first name
+- Summarizes their overall wellbeing with specific, concrete details
+- Highlights 2-3 meaningful moments from their day
+- Addresses any health notes in reassuring but honest language
+- Closes warmly and invites the family to visit or call
 
-Keep it under 200 words. Sound like a real human who cares about this resident, not a form letter."""
+Sign off from "The Care Team at [Facility Name]".
+Keep it under 200 words. Never use generic phrases like "doing well" without specifics."""
     return jsonify({"result": ask_claude(prompt)})
 
 @app.route("/api/incident-report", methods=["POST"])
+@login_required
 @limiter.limit("10 per minute")
 def incident_report():
     data = request.json
@@ -113,7 +123,7 @@ def incident_report():
 Staff member {data['staff_name']} reported this incident involving resident {data['resident_name']}:
 {data['notes']}
 
-Generate a complete, formal incident report with these exact sections:
+Generate a complete, formal incident report:
 
 INCIDENT REPORT
 Date/Time: {today}
@@ -121,61 +131,64 @@ Resident: {data['resident_name']}
 Staff Present: {data['staff_name']}
 
 1. INCIDENT SUMMARY
-One clear sentence describing what occurred.
+One precise sentence. Include: what happened, where, when.
 
 2. DETAILED DESCRIPTION
-Full factual account. Include: what happened, where, when, who was present, sequence of events. No speculation.
+Chronological, factual account. No opinions or speculation. Include exact times, locations, witnesses.
 
 3. IMMEDIATE ACTIONS TAKEN
-Bullet list of every action taken by staff in response.
+Numbered list of every intervention. Include who did what and when.
 
 4. RESIDENT CONDITION AFTER INCIDENT
-Current physical and emotional status. Vital signs if taken.
+Objective assessment. Vital signs if taken. Pain level if reported. Emotional state.
 
 5. NOTIFICATIONS MADE
-Who was contacted (family, physician, supervisor) and when.
+Name, relationship, time contacted, method of contact, response given.
 
 6. FOLLOW-UP REQUIRED
-Specific next steps with suggested timeframes.
+Specific action items with responsible parties and deadlines.
 
 7. PREVENTION RECOMMENDATIONS
-One specific process change to prevent recurrence.
+One concrete, implementable process change.
 
-Use formal clinical language appropriate for state regulatory review."""
+Use clinical language. Avoid passive voice. This document may be reviewed by state regulators."""
     return jsonify({"result": ask_claude(prompt)})
 
 @app.route("/api/staff-scheduling", methods=["POST"])
+@login_required
 @limiter.limit("10 per minute")
 def staff_scheduling():
     data = request.json
     valid, error = validate(data, ["facility_name", "problem"])
     if not valid:
         return jsonify({"error": error}), 400
-    prompt = f"""You are an expert senior living operations consultant. A facility manager at {data['facility_name']} needs urgent help:
+    prompt = f"""You are an expert senior living operations consultant with 20 years experience.
 
+A facility manager at {data['facility_name']} has this urgent situation:
 {data['problem']}
 
-Provide a structured, actionable response:
+Respond with:
 
 IMMEDIATE ACTION PLAN
-Step-by-step what to do RIGHT NOW in the next 30 minutes.
+Numbered steps for the next 30 minutes. Be specific — who to call first and why.
 
-CALL LIST (in priority order)
-Name each type of staff to contact, in what order, and why.
+CALL LIST
+Priority order with role title, not generic names. Include what to offer each person.
 
-OVERTIME & COMPLIANCE RISK
-Flag any labor law or staffing ratio concerns. How to stay compliant.
+COMPLIANCE RISK ASSESSMENT
+Specific staffing ratios at risk. Relevant state regulations to be aware of.
 
 WORD-FOR-WORD PHONE SCRIPT
-Exact script to use when calling staff to cover. Include what to say if they say no.
+Opening line. What to say if they say yes. What to say if they say no. Closing.
 
 ROOT CAUSE & PREVENTION
-One specific policy or process change to prevent this exact situation from recurring.
+One policy change that eliminates this exact scenario recurring.
 
-Be direct. This manager is stressed and needs fast, clear answers."""
+Be direct. No filler. This manager needs answers in 60 seconds."""
     return jsonify({"result": ask_claude(prompt)})
 
 @app.route("/api/move-in", methods=["POST"])
+@login_required
 @limiter.limit("10 per minute")
 def move_in():
     data = request.json
@@ -184,56 +197,67 @@ def move_in():
         return jsonify({"error": error}), 400
     prompt = f"""You are a warm, experienced senior living coordinator at {data['facility_name']}.
 
-New resident details:
+New resident:
 - Name: {data['resident_name']}
 - Room: {data['room_number']}
-- Move-in date: {data['move_in_date']}
+- Move-in: {data['move_in_date']}
 - Care level: {data['care_level']}
-- Primary family contact: {data['family_contact']}
+- Family contact: {data['family_contact']}
 - Personal notes: {data.get('notes', 'None provided')}
 
-Generate a complete, personalized move-in package with three documents:
+Generate three distinct documents:
 
 ---WELCOME LETTER---
-Personal, warm letter to {data['resident_name']} and family. Reference their specific details and notes. Signed by Executive Director. Under 200 words.
+Address the resident by first name. Reference their specific personal notes naturally.
+Mention their room number and move-in date. Express genuine excitement.
+Sign from Executive Director. Warm, human, specific. Under 200 words.
 
 ---FAMILY CHECKLIST---
-What to bring / what NOT to bring / key contacts / first week expectations / how to stay connected. Use checkboxes format.
+Format as checkboxes. Sections: What to Bring, Do Not Bring, Key Contacts, First Week Timeline, Staying Connected.
+Make it practical and specific to their care level.
 
 ---DAY ONE SCHEDULE---
-Personalized hour-by-hour schedule for move-in day. Make it warm and specific to this resident based on their notes."""
+Hour by hour from arrival to bedtime. Reference their personal interests from notes.
+Include: arrival, room setup, care team introductions, first meal, orientation tour, evening routine.
+Make it feel welcoming not clinical."""
     return jsonify({"result": ask_claude(prompt)})
 
 @app.route("/api/research", methods=["POST"])
+@login_required
 @limiter.limit("10 per minute")
 def research():
     data = request.json
     valid, error = validate(data, ["company"])
     if not valid:
         return jsonify({"error": error}), 400
-    prompt = f"""I have a sales call with {data['company']} today. I sell ClarityCare - AI automation tools built specifically for senior living facilities.
+    prompt = f"""You are a senior living industry expert preparing me for a sales call with {data['company']}.
+I sell ClarityCare — AI automation that eliminates documentation burden for senior living staff.
 
-Research this company and give me:
+Give me:
 
-COMPANY OVERVIEW
-What they do, how many facilities, their market position, recent news.
+COMPANY PROFILE
+Size, locations, care types offered, ownership structure, recent news or challenges.
 
-TOP 3 PAIN POINTS
-Their most likely operational challenges based on their size and type.
+PAIN POINTS SPECIFIC TO THEIR PROFILE
+3 operational problems they almost certainly face given their size and type.
+Be specific — not generic "staffing challenges" but WHY their specific situation creates this.
 
-TAILORED TALKING POINTS
-3 specific ways ClarityCare solves their exact problems. Be concrete.
+CLARITYCARE FIT
+3 concrete ways our tools solve their specific problems. Use their language, not ours.
 
 DISCOVERY QUESTIONS
-3 smart questions that will uncover their biggest needs and open the door to a demo.
+3 questions that make them realize they have a problem I can solve.
+Each question should feel consultative, not salesy.
 
-COMPETITIVE ANGLE
-What makes this a good time to approach them specifically.
+COMPETITIVE INTELLIGENCE
+What solutions they likely use now and why ClarityCare is better.
 
-Be specific and practical. I have 2 minutes to prep."""
+ONE SENTENCE OPENER
+The single best line to open the call that will make them want to keep talking."""
     return jsonify({"result": ask_claude(prompt)})
 
 @app.route("/api/medication-log", methods=["POST"])
+@login_required
 @limiter.limit("10 per minute")
 def medication_log():
     data = request.json
@@ -241,102 +265,143 @@ def medication_log():
     if not valid:
         return jsonify({"error": error}), 400
     today = datetime.now().strftime("%B %d, %Y %I:%M %p")
-    prompt = f"""You are a senior living nurse generating a formal medication administration summary.
+    prompt = f"""You are a licensed nurse generating a formal medication administration record.
 
 Resident: {data['resident_name']}
 Date/Time: {today}
-Medications listed: {data['medications']}
-Nurse notes: {data['notes']}
+Raw medication data: {data['medications']}
+Nurse observations: {data['notes']}
 
-Generate a professional medication log summary with:
+Generate a formal MAR summary:
 
-MEDICATION ADMINISTRATION SUMMARY
-Date/Time: {today}
+MEDICATION ADMINISTRATION RECORD
 Resident: {data['resident_name']}
+Date: {today}
 
 MEDICATIONS ADMINISTERED
-List each medication with: name, dose, route, time, administered by.
+For each medication include: Generic name, Brand name if known, Dose, Route, Time administered, Administered by (leave blank for nurse signature), Response observed.
 
-RESIDENT RESPONSE
-How the resident responded. Any side effects or concerns noted.
+MEDICATION REFUSALS
+Any medications not administered. Reason. Interventions attempted.
 
-REFUSALS OR MISSED DOSES
-Any medications not taken and reason why.
+ADVERSE REACTIONS OR CONCERNS
+Any side effects, allergic responses, or unexpected reactions noted.
 
-FOLLOW-UP REQUIRED
-Any medications needing physician review or family notification.
+CLINICAL OBSERVATIONS
+Resident's overall status during medication pass. Relevant vitals if taken.
 
-NURSE SIGNATURE LINE
-Space for nurse name, credentials, and signature.
+FOLLOW-UP ACTIONS REQUIRED
+Physician notification needed? Family notification? Next dose adjustments?
 
-Use clinical language appropriate for medical records."""
+SIGNATURE BLOCK
+Nurse Name: _______________ RN/LPN License #: _______________ Date: _______________
+
+Use standard clinical abbreviations (PO, SL, IM, PRN, etc.)"""
     return jsonify({"result": ask_claude(prompt)})
 
 @app.route("/api/care-plan", methods=["POST"])
+@login_required
 @limiter.limit("10 per minute")
 def care_plan():
     data = request.json
     valid, error = validate(data, ["resident_name", "diagnosis", "care_needs"])
     if not valid:
         return jsonify({"error": error}), 400
-    prompt = f"""You are a senior living Director of Nursing creating a comprehensive care plan.
+    prompt = f"""You are a Director of Nursing creating a CMS-compliant care plan.
 
 Resident: {data['resident_name']}
-Primary diagnosis/conditions: {data['diagnosis']}
-Identified care needs: {data['care_needs']}
-Additional notes: {data.get('notes', 'None')}
+Diagnoses: {data['diagnosis']}
+Care needs: {data['care_needs']}
+Notes: {data.get('notes', 'None')}
 
-Generate a professional care plan with these sections:
+Generate a comprehensive care plan:
 
 RESIDENT CARE PLAN
 Resident: {data['resident_name']}
-Date: {datetime.now().strftime("%B %d, %Y")}
+Date initiated: {datetime.now().strftime("%B %d, %Y")}
+Review date: {datetime.now().strftime("%B %d, %Y")} + 90 days
 
-1. MEDICAL DIAGNOSES & CONDITIONS
-2. CARE GOALS (90-day)
-3. NURSING INTERVENTIONS
-4. DIETARY REQUIREMENTS
-5. MOBILITY & ACTIVITY PLAN
-6. PSYCHOSOCIAL NEEDS
-7. SAFETY MEASURES
-8. FAMILY COMMUNICATION PLAN
+For each section below, be specific and measurable:
 
-Use professional clinical language compliant with CMS guidelines."""
+1. PROBLEM/NEED IDENTIFICATION
+List each diagnosis with ICD-10 codes where applicable.
+
+2. GOALS (90-DAY)
+3-5 goals. Each must be: Specific, Measurable, Achievable, Relevant, Time-bound.
+Format: "Resident will [action] by [date] as evidenced by [measure]"
+
+3. INTERVENTIONS
+Who does what, when, how often. Assign to specific role (RN, CNA, PT, etc.)
+
+4. NUTRITIONAL PLAN
+Diet type, texture modifications, hydration goals, dining assistance level, restrictions.
+
+5. MOBILITY & FALL RISK
+Braden/Fall risk score if known. Assistive devices. Activity level. PT/OT involvement.
+
+6. PSYCHOSOCIAL & COGNITIVE
+Mental status. Behavioral approaches. Activity preferences. Social engagement plan.
+
+7. SAFETY PROTOCOLS
+Specific to their diagnoses. Elopement risk if applicable. Side rail policy.
+
+8. FAMILY/RESPONSIBLE PARTY INVOLVEMENT
+Communication frequency. Decision-making role. Education needs.
+
+This plan must meet F-tag requirements for CMS survey readiness."""
     return jsonify({"result": ask_claude(prompt)})
 
 @app.route("/api/discharge-summary", methods=["POST"])
+@login_required
 @limiter.limit("10 per minute")
 def discharge_summary():
     data = request.json
     valid, error = validate(data, ["resident_name", "discharge_destination", "stay_summary"])
     if not valid:
         return jsonify({"error": error}), 400
-    prompt = f"""You are a senior living Director of Nursing generating a formal discharge summary.
+    prompt = f"""You are a Director of Nursing generating a clinical discharge summary for medical record continuity.
 
 Resident: {data['resident_name']}
 Discharge destination: {data['discharge_destination']}
-Summary of stay: {data['stay_summary']}
+Stay summary: {data['stay_summary']}
 Additional notes: {data.get('notes', 'None')}
 
-Generate a complete discharge summary with:
+Generate a complete discharge summary:
 
 DISCHARGE SUMMARY
 Resident: {data['resident_name']}
 Discharge Date: {datetime.now().strftime("%B %d, %Y")}
 Discharge Destination: {data['discharge_destination']}
+Attending Physician: _______________
 
-1. REASON FOR ADMISSION
-2. SUMMARY OF STAY
-3. CURRENT HEALTH STATUS AT DISCHARGE
-4. MEDICATIONS AT DISCHARGE
-5. FOLLOW-UP CARE REQUIRED
-6. INSTRUCTIONS FOR RECEIVING FACILITY OR FAMILY
-7. EMERGENCY CONTACTS
+1. ADMISSION DIAGNOSIS & REASON FOR STAY
+Primary and secondary diagnoses. Functional status at admission.
 
-Use formal clinical language suitable for medical record transfer."""
+2. CLINICAL COURSE
+Chronological summary of stay. Key interventions, progress, setbacks.
+
+3. FUNCTIONAL STATUS AT DISCHARGE
+ADL independence level. Cognitive status. Mobility. Compare to admission baseline.
+
+4. DISCHARGE MEDICATIONS
+Complete reconciled medication list. Dose, frequency, route, purpose, prescriber.
+
+5. PENDING RESULTS OR FOLLOW-UP
+Outstanding labs, imaging, specialist referrals. Specific appointment dates if known.
+
+6. DISCHARGE INSTRUCTIONS
+Activity restrictions. Diet. Warning signs requiring immediate medical attention.
+Written in plain language suitable for patient/family.
+
+7. CARE TRANSITION PLAN
+Who is responsible for ongoing care. Home health orders if applicable.
+Emergency contacts and who to call for what.
+
+Flag any high-risk discharge concerns (falls, readmission risk, medication complexity)."""
     return jsonify({"result": ask_claude(prompt)})
 
 @app.route("/api/stream", methods=["POST"])
+@login_required
 @limiter.limit("10 per minute")
 def stream():
     data = request.json
@@ -381,6 +446,7 @@ def stream():
                                         "X-Accel-Buffering": "no"})
 
 @app.route("/api/save-document", methods=["POST"])
+@login_required
 @limiter.limit("30 per minute")
 def save_document():
     data = request.json
@@ -397,11 +463,13 @@ def save_document():
     return jsonify({"success": True, "id": doc.id})
 
 @app.route("/api/documents", methods=["GET"])
+@login_required
 def get_documents():
     docs = Document.query.order_by(Document.created_at.desc()).limit(50).all()
     return jsonify([d.to_dict() for d in docs])
 
 @app.route("/api/documents/<int:doc_id>", methods=["GET"])
+@login_required
 def get_document(doc_id):
     doc = Document.query.get_or_404(doc_id)
     return jsonify({
@@ -414,6 +482,7 @@ def get_document(doc_id):
     })
 
 @app.route("/api/documents/<int:doc_id>", methods=["DELETE"])
+@login_required
 def delete_document(doc_id):
     doc = Document.query.get_or_404(doc_id)
     db.session.delete(doc)
