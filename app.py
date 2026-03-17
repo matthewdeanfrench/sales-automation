@@ -770,6 +770,86 @@ Format as a professional compliance report the Administrator can share with depa
 
     return jsonify({"result": ask_claude(prompt)})
 
+@app.route("/api/risk-assessment", methods=["POST"])
+@login_required
+@limiter.limit("5 per minute")
+def risk_assessment():
+    data = request.json
+    valid, error = validate(data, ["resident_name", "notes"])
+    if not valid:
+        return jsonify({"error": error}), 400
+
+    def call_claude_internal(prompt):
+        url = "https://api.anthropic.com/v1/messages"
+        payload = json.dumps({
+            "model": "claude-sonnet-4-20250514",
+            "max_tokens": 1024,
+            "messages": [{"role": "user", "content": prompt}]
+        }).encode()
+        req = urllib.request.Request(url, data=payload, headers={
+            "Content-Type": "application/json",
+            "x-api-key": API_KEY,
+            "anthropic-version": "2023-06-01"
+        })
+        with urllib.request.urlopen(req) as response:
+            result = json.loads(response.read())
+            return result["content"][0]["text"]
+
+    resident_name = data["resident_name"]
+    notes = data["notes"]
+    facility = data.get("facility_name", "Senior Living Facility")
+
+    try:
+        # Step 1: Identify risks
+        risk_factors = call_claude_internal(f"""You are a senior living clinical expert.
+Caregiver notes for {resident_name}: {notes}
+Extract and list ALL risk factors. Format as numbered list.
+Include: clinical, fall, medication, social/behavioral, environmental risks.""")
+
+        # Step 2: Rate risks
+        risk_ratings = call_claude_internal(f"""You are a senior living clinical risk specialist.
+Resident: {resident_name}. Notes: {notes}
+Risk factors identified: {risk_factors}
+For each risk: rate severity (Critical/High/Medium/Low), explain why, state immediate action needed.""")
+
+        # Step 3: Recommendations
+        recommendations = call_claude_internal(f"""You are a Director of Nursing.
+Resident: {resident_name}. Facility: {facility}
+Risk analysis: {risk_ratings}
+Generate: 1) Immediate interventions 2) Care plan modifications 3) Monitoring protocols 4) Family notification needs 5) Physician notification needed?""")
+
+        # Step 4: Final report
+        final_report = call_claude_internal(f"""You are a clinical documentation specialist.
+Compile a formal Resident Risk Assessment Report:
+RESIDENT: {resident_name} | FACILITY: {facility}
+RISKS: {risk_factors}
+RATINGS: {risk_ratings}
+RECOMMENDATIONS: {recommendations}
+Write a professional clinical report with executive summary, prioritized risks, action items with responsible parties. Under 400 words.""")
+
+        result = f"""RESIDENT RISK ASSESSMENT REPORT
+{'='*50}
+
+{final_report}
+
+{'='*50}
+DETAILED RISK ANALYSIS
+
+RISK FACTORS IDENTIFIED:
+{risk_factors}
+
+SEVERITY RATINGS:
+{risk_ratings}
+
+CARE RECOMMENDATIONS:
+{recommendations}"""
+
+        log_action("risk_assessment", resource=resident_name, details=f"Facility: {facility}")
+        return jsonify({"result": result})
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 @app.errorhandler(429)
 def rate_limit_exceeded(e):
     return jsonify({"error": "Too many requests. Please wait a moment and try again."}), 429

@@ -119,6 +119,7 @@
         <div class="tab" onclick="showTab('discharge', this)">🚪 Discharge</div>
         <div class="tab" onclick="showTab('staffing', this)">🔮 Staffing AI</div>
         <div class="tab" onclick="showTab('survey', this)">📊 Survey Prep</div>
+        <div class="tab" onclick="showTab('risk', this)">🧠 Risk Assessment</div>
         <div class="tab" onclick="showTab('research', this)">🔍 Research</div>
     </div>
 
@@ -426,6 +427,45 @@
                         <button class="tool-btn" id="sf-save-btn" onclick="saveDoc('staffing-predict', '', val('sf-facility'), 'sf-content', 'sf-save-btn')">💾 Save</button>
                     </div>
                     <div class="output-content" id="sf-content"></div>
+                </div>
+            </div>
+        </div>
+
+<!-- Risk Assessment -->
+        <div class="tool-panel" id="panel-risk">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Resident Risk Assessment Agent</h2>
+                    <p>AI agent that makes 4 analysis passes to build a comprehensive clinical risk report. Takes 30-60 seconds.</p>
+                </div>
+                <div style="background:#fef3c7;border:1px solid #fcd34d;border-radius:8px;padding:12px 16px;margin-bottom:20px;font-size:13px;color:#92400e;">
+                    ⚡ This tool runs 4 AI analysis passes — allow 30-60 seconds for the complete report.
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Resident Name <span class="required">*</span></label>
+                        <input type="text" id="ra-resident" placeholder="e.g. Helen Martinez" maxlength="100">
+                    </div>
+                    <div class="form-group">
+                        <label>Facility Name</label>
+                        <input type="text" id="ra-facility" placeholder="e.g. Sunrise Gardens" maxlength="100">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Resident Notes <span class="required">*</span></label>
+                    <textarea id="ra-notes" placeholder="e.g. Helen is 84, has type 2 diabetes and early dementia, fell twice last week, refuses medications sometimes, family visits rarely, seems withdrawn lately..." maxlength="2000" oninput="updateCount(this, 'ra-count')"></textarea>
+                    <div class="char-count"><span id="ra-count">0</span> / 2000</div>
+                </div>
+                <button class="btn" onclick="runRiskAssessment()">Run Risk Assessment</button>
+                <div class="loading" id="ra-loading"><div class="spinner"></div>Running 4-pass AI analysis... please wait 30-60 seconds...</div>
+                <div class="error-box" id="ra-error"></div>
+                <div class="output-box" id="ra-output-box">
+                    <div class="output-toolbar">
+                        <button class="tool-btn" onclick="copyOut('ra-content', this)">📋 Copy</button>
+                        <button class="tool-btn" onclick="window.print()">🖨️ Print</button>
+                        <button class="tool-btn" id="ra-save-btn" onclick="saveDoc('risk-assessment', val('ra-resident'), val('ra-facility'), 'ra-content', 'ra-save-btn')">💾 Save</button>
+                    </div>
+                    <div class="output-content" id="ra-content"></div>
                 </div>
             </div>
         </div>
@@ -759,6 +799,49 @@ async function publishToFamily() {
             status.style.color = '#c0392b';
         }
         status.style.display = 'block';
+    }
+
+async function runRiskAssessment() {
+        const resident = val('ra-resident');
+        const notes = val('ra-notes');
+        const facility = val('ra-facility');
+        const loading = document.getElementById('ra-loading');
+        const errorBox = document.getElementById('ra-error');
+        const outputBox = document.getElementById('ra-output-box');
+        const content = document.getElementById('ra-content');
+
+        if (!resident || !notes) {
+            errorBox.textContent = 'Please fill in resident name and notes.';
+            errorBox.classList.add('visible');
+            return;
+        }
+
+        loading.classList.add('visible');
+        errorBox.classList.remove('visible');
+        outputBox.classList.remove('visible');
+        content.textContent = '';
+
+        try {
+            const response = await fetch('/api/risk-assessment', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ resident_name: resident, notes, facility_name: facility })
+            });
+            const result = await response.json();
+            if (result.error) {
+                errorBox.textContent = result.error;
+                errorBox.classList.add('visible');
+            } else {
+                content.textContent = result.result;
+                outputBox.classList.add('visible');
+                outputBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+        } catch (err) {
+            errorBox.textContent = 'Connection error. Please try again.';
+            errorBox.classList.add('visible');
+        } finally {
+            loading.classList.remove('visible');
+        }
     }
 
     function closeModal() {
