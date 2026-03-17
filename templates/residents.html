@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ClarityCare — Residents</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Georgia, serif; background: #f5f3ef; color: #2c2c2c; }
+
+        header {
+            background: #1a2f2a; color: white;
+            padding: 16px 40px;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .logo { display: flex; align-items: center; gap: 10px; }
+        .logo-icon { width: 32px; height: 32px; background: #7ec8a0; border-radius: 7px; display: flex; align-items: center; justify-content: center; font-size: 16px; color: #1a2f2a; }
+        .logo-text h1 { font-size: 18px; font-weight: 400; color: white; }
+        .header-nav a { color: rgba(255,255,255,0.6); text-decoration: none; font-size: 13px; margin-left: 24px; }
+        .header-nav a:hover { color: white; }
+
+        .container { max-width: 780px; margin: 32px auto; padding: 0 24px; }
+
+        .page-header { margin-bottom: 24px; }
+        .page-header h2 { font-size: 24px; font-weight: 400; margin-bottom: 4px; }
+        .page-header p { font-size: 13px; color: #999; }
+
+        .search-box {
+            background: white; border-radius: 10px; padding: 12px 16px;
+            display: flex; align-items: center; gap: 10px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.06); margin-bottom: 20px;
+            border: 1px solid #e8e4de;
+        }
+        .search-box input {
+            border: none; outline: none; font-size: 15px;
+            font-family: Georgia, serif; flex: 1; background: transparent; color: #2c2c2c;
+        }
+
+        .resident-grid { display: flex; flex-direction: column; gap: 12px; }
+
+        .resident-card {
+            background: white; border-radius: 12px; padding: 20px 24px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+            display: flex; align-items: center; justify-content: space-between;
+            text-decoration: none; color: #2c2c2c;
+            border: 1px solid transparent; transition: all 0.2s;
+        }
+        .resident-card:hover { border-color: #7ec8a0; }
+        .resident-card-name { font-size: 16px; color: #1a2f2a; }
+        .resident-card-arrow { color: #aaa; font-size: 18px; }
+
+        .empty { text-align: center; padding: 60px; color: #aaa; font-size: 15px; background: white; border-radius: 12px; }
+        .loading { text-align: center; padding: 60px; color: #aaa; font-size: 15px; font-style: italic; }
+
+        .btn-back { display: inline-block; background: #1a2f2a; color: white; text-decoration: none; padding: 10px 20px; border-radius: 8px; font-size: 13px; font-family: Georgia, serif; margin-bottom: 24px; }
+        .btn-back:hover { background: #111f1c; }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="logo">
+        <div class="logo-icon">◈</div>
+        <div class="logo-text"><h1>ClarityCare</h1></div>
+    </div>
+    <nav class="header-nav">
+        <a href="/app">Tools</a>
+        <a href="/dashboard">Dashboard</a>
+        <a href="/residents" style="color:white;">Residents</a>
+    </nav>
+</header>
+
+<div class="container">
+    <a href="/app" class="btn-back">← Back to Tools</a>
+
+    <div class="page-header">
+        <h2>Residents</h2>
+        <p>Click any resident to view their complete care document history.</p>
+    </div>
+
+    <div class="search-box">
+        <span style="color:#aaa;">🔍</span>
+        <input type="text" id="search" placeholder="Search residents..." oninput="filterResidents()">
+    </div>
+
+    <div class="resident-grid" id="resident-grid">
+        <div class="loading">Loading residents...</div>
+    </div>
+</div>
+
+<script>
+    let allResidents = [];
+
+    async function loadResidents() {
+        try {
+            const response = await fetch('/api/residents');
+            allResidents = await response.json();
+            renderResidents(allResidents);
+        } catch {
+            document.getElementById('resident-grid').innerHTML = '<div class="empty">Error loading residents.</div>';
+        }
+    }
+
+    function renderResidents(residents) {
+        const grid = document.getElementById('resident-grid');
+        if (residents.length === 0) {
+            grid.innerHTML = '<div class="empty">No residents found. Generate documents for residents to see them here.</div>';
+            return;
+        }
+        grid.innerHTML = residents.map(name => `
+            <a href="/resident/${encodeURIComponent(name)}" class="resident-card">
+                <div class="resident-card-name">${name}</div>
+                <div class="resident-card-arrow">→</div>
+            </a>
+        `).join('');
+    }
+
+    function filterResidents() {
+        const query = document.getElementById('search').value.toLowerCase();
+        const filtered = allResidents.filter(r => r.toLowerCase().includes(query));
+        renderResidents(filtered);
+    }
+
+    loadResidents();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ClarityCare — Resident Timeline</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Georgia, serif; background: #f5f3ef; color: #2c2c2c; }
+
+        header {
+            background: #1a2f2a; color: white;
+            padding: 16px 40px;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .logo { display: flex; align-items: center; gap: 10px; }
+        .logo-icon { width: 32px; height: 32px; background: #7ec8a0; border-radius: 7px; display: flex; align-items: center; justify-content: center; font-size: 16px; color: #1a2f2a; }
+        .logo-text h1 { font-size: 18px; font-weight: 400; color: white; }
+        .header-nav a { color: rgba(255,255,255,0.6); text-decoration: none; font-size: 13px; margin-left: 24px; }
+        .header-nav a:hover { color: white; }
+
+        .container { max-width: 780px; margin: 32px auto; padding: 0 24px; }
+
+        .btn-back { display: inline-block; background: #1a2f2a; color: white; text-decoration: none; padding: 10px 20px; border-radius: 8px; font-size: 13px; font-family: Georgia, serif; margin-bottom: 24px; }
+        .btn-back:hover { background: #111f1c; }
+
+        .resident-header {
+            background: white; border-radius: 12px; padding: 28px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.06); margin-bottom: 32px;
+            display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;
+        }
+        .resident-name { font-size: 26px; font-weight: 400; color: #1a2f2a; }
+        .resident-stats { display: flex; gap: 24px; flex-wrap: wrap; }
+        .resident-stat { text-align: center; }
+        .resident-stat-number { font-size: 24px; color: #1a2f2a; letter-spacing: -0.02em; }
+        .resident-stat-label { font-size: 12px; color: #aaa; }
+
+        .timeline { position: relative; }
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 20px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #e8e4de;
+        }
+
+        .timeline-item {
+            position: relative;
+            padding-left: 56px;
+            margin-bottom: 24px;
+        }
+        .timeline-dot {
+            position: absolute;
+            left: 12px;
+            top: 20px;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #7ec8a0;
+            border: 3px solid white;
+            box-shadow: 0 0 0 2px #7ec8a0;
+        }
+        .timeline-dot.incident { background: #ef4444; box-shadow: 0 0 0 2px #ef4444; }
+        .timeline-dot.care-plan { background: #3b82f6; box-shadow: 0 0 0 2px #3b82f6; }
+        .timeline-dot.family { background: #8b5cf6; box-shadow: 0 0 0 2px #8b5cf6; }
+        .timeline-dot.risk { background: #f59e0b; box-shadow: 0 0 0 2px #f59e0b; }
+
+        .timeline-card {
+            background: white; border-radius: 12px; padding: 20px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+            cursor: pointer; transition: all 0.2s;
+            border: 1px solid transparent;
+        }
+        .timeline-card:hover { border-color: #7ec8a0; }
+
+        .timeline-meta { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; }
+        .timeline-badge {
+            padding: 3px 10px; border-radius: 20px;
+            font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em;
+        }
+        .badge-family-update { background: #f0fdf4; color: #16a34a; }
+        .badge-incident-report { background: #fef2f2; color: #dc2626; }
+        .badge-care-plan { background: #eff6ff; color: #2563eb; }
+        .badge-medication-log { background: #fefce8; color: #ca8a04; }
+        .badge-discharge-summary { background: #f5f3ef; color: #666; }
+        .badge-risk-assessment { background: #fffbeb; color: #d97706; }
+        .badge-move-in { background: #f0fdf4; color: #15803d; }
+        .badge-family-portal-published { background: #faf5ff; color: #7c3aed; }
+        .badge-default { background: #f5f3ef; color: #666; }
+
+        .timeline-date { font-size: 12px; color: #aaa; }
+        .timeline-preview { font-size: 14px; color: #555; line-height: 1.6; }
+        .timeline-user { font-size: 11px; color: #bbb; margin-top: 8px; }
+
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; }
+        .modal-overlay.visible { display: flex; }
+        .modal { background: white; border-radius: 16px; padding: 32px; max-width: 680px; width: 90%; max-height: 80vh; overflow-y: auto; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .modal-title { font-size: 18px; font-weight: 400; }
+        .modal-close { background: none; border: none; font-size: 20px; cursor: pointer; color: #aaa; }
+        .modal-content { white-space: pre-wrap; font-size: 14px; line-height: 1.8; color: #2c2c2c; }
+        .modal-toolbar { display: flex; gap: 8px; margin-bottom: 16px; }
+        .tool-btn { background: white; border: 1px solid #ddd; padding: 5px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; color: #555; font-family: Georgia, serif; }
+        .tool-btn:hover { background: #f0ede8; }
+
+        .empty { text-align: center; padding: 60px; color: #aaa; font-size: 15px; background: white; border-radius: 12px; }
+        .loading { text-align: center; padding: 60px; color: #aaa; font-size: 15px; font-style: italic; }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="logo">
+        <div class="logo-icon">◈</div>
+        <div class="logo-text"><h1>ClarityCare</h1></div>
+    </div>
+    <nav class="header-nav">
+        <a href="/app">Tools</a>
+        <a href="/dashboard">Dashboard</a>
+        <a href="/residents">All Residents</a>
+    </nav>
+</header>
+
+<div class="container">
+    <a href="/residents" class="btn-back">← All Residents</a>
+
+    <div class="resident-header">
+        <div>
+            <div class="resident-name" id="resident-name">Loading...</div>
+            <div style="font-size:13px;color:#999;margin-top:4px;">Complete care document history</div>
+        </div>
+        <div class="resident-stats">
+            <div class="resident-stat">
+                <div class="resident-stat-number" id="total-docs">—</div>
+                <div class="resident-stat-label">Total documents</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="timeline-container">
+        <div class="loading">Loading timeline...</div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="doc-modal">
+    <div class="modal">
+        <div class="modal-header">
+            <span class="modal-title" id="modal-title">Document</span>
+            <button class="modal-close" onclick="closeModal()">×</button>
+        </div>
+        <div class="modal-toolbar">
+            <button class="tool-btn" onclick="copyModal()">📋 Copy</button>
+            <button class="tool-btn" onclick="window.print()">🖨️ Print</button>
+        </div>
+        <div class="modal-content" id="modal-content"></div>
+    </div>
+</div>
+
+<script>
+    const residentName = "{{ resident_name }}";
+    let currentContent = '';
+
+    const toolLabels = {
+        'family-update': '💌 Family Update',
+        'incident-report': '📋 Incident Report',
+        'staff-scheduling': '📅 Scheduling',
+        'move-in': '🏠 Move-In',
+        'medication-log': '💊 Medication Log',
+        'care-plan': '📄 Care Plan',
+        'discharge-summary': '🚪 Discharge Summary',
+        'staffing-predict': '🔮 Staffing AI',
+        'survey-prep': '📊 Survey Prep',
+        'risk-assessment': '🧠 Risk Assessment',
+        'family-portal-published': '📱 Family Portal',
+        'research': '🔍 Research',
+        'care-note': '📝 Care Note'
+    };
+
+    const dotClass = {
+        'incident-report': 'incident',
+        'care-plan': 'care-plan',
+        'family-portal-published': 'family',
+        'risk-assessment': 'risk'
+    };
+
+    const badgeClass = {
+        'family-update': 'badge-family-update',
+        'incident-report': 'badge-incident-report',
+        'care-plan': 'badge-care-plan',
+        'medication-log': 'badge-medication-log',
+        'discharge-summary': 'badge-discharge-summary',
+        'risk-assessment': 'badge-risk-assessment',
+        'move-in': 'badge-move-in',
+        'family-portal-published': 'badge-family-portal-published'
+    };
+
+    async function loadTimeline() {
+        document.getElementById('resident-name').textContent = residentName;
+        try {
+            const response = await fetch(`/api/resident/${encodeURIComponent(residentName)}/timeline`);
+            const data = await response.json();
+            document.getElementById('total-docs').textContent = data.total_documents;
+
+            if (data.timeline.length === 0) {
+                document.getElementById('timeline-container').innerHTML = '<div class="empty">No documents found for this resident.</div>';
+                return;
+            }
+
+            document.getElementById('timeline-container').innerHTML = `
+                <div class="timeline">
+                    ${data.timeline.map(item => `
+                        <div class="timeline-item" onclick="openDoc('${item.id}', '${item.type}', \`${item.full_content.replace(/`/g, "'")}\`, '${toolLabels[item.tool] || item.tool}')">
+                            <div class="timeline-dot ${dotClass[item.tool] || ''}"></div>
+                            <div class="timeline-card">
+                                <div class="timeline-meta">
+                                    <span class="timeline-badge ${badgeClass[item.tool] || 'badge-default'}">${toolLabels[item.tool] || item.tool}</span>
+                                    <span class="timeline-date">${item.created_at}</span>
+                                </div>
+                                <div class="timeline-preview">${item.content}</div>
+                                <div class="timeline-user">${item.created_by || ''}</div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        } catch {
+            document.getElementById('timeline-container').innerHTML = '<div class="empty">Error loading timeline.</div>';
+        }
+    }
+
+    function openDoc(id, type, content, title) {
+        currentContent = content;
+        document.getElementById('modal-title').textContent = title;
+        document.getElementById('modal-content').textContent = content;
+        document.getElementById('doc-modal').classList.add('visible');
+    }
+
+    function closeModal() {
+        document.getElementById('doc-modal').classList.remove('visible');
+    }
+
+    async function copyModal() {
+        await navigator.clipboard.writeText(currentContent);
+        event.target.textContent = '✅ Copied!';
+        setTimeout(() => event.target.textContent = '📋 Copy', 2000);
+    }
+
+    document.getElementById('doc-modal').addEventListener('click', function(e) {
+        if (e.target === this) closeModal();
+    });
+
+    loadTimeline();
+</script>
+
+</body>
+</html>

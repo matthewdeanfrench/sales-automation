@@ -949,6 +949,72 @@ def get_signature():
     sig += f"\nDate: {datetime.now().strftime('%B %d, %Y %I:%M %p')}"
     return jsonify({"signature": sig, "name": user.name})
 
+@app.route("/resident/<resident_name>")
+@login_required
+def resident_timeline(resident_name):
+    return render_template("resident_timeline.html", resident_name=resident_name)
+
+@app.route("/api/resident/<resident_name>/timeline", methods=["GET"])
+@login_required
+def get_resident_timeline(resident_name):
+    from sqlalchemy import or_
+    docs = Document.query.filter(
+        Document.resident_name.ilike(f"%{resident_name}%")
+    ).order_by(Document.created_at.desc()).all()
+    
+    family_updates = FamilyUpdate.query.filter(
+        FamilyUpdate.resident_name.ilike(f"%{resident_name}%")
+    ).order_by(FamilyUpdate.created_at.desc()).all()
+    
+    timeline = []
+    
+    for doc in docs:
+        timeline.append({
+            'type': 'document',
+            'tool': doc.tool,
+            'content': doc.content[:200] + '...' if len(doc.content) > 200 else doc.content,
+            'full_content': doc.content,
+            'created_at': doc.created_at.strftime('%B %d, %Y %I:%M %p'),
+            'created_by': doc.user_email,
+            'id': doc.id
+        })
+    
+    for fu in family_updates:
+        timeline.append({
+            'type': 'family_update',
+            'tool': 'family-portal-published',
+            'content': fu.content[:200] + '...' if len(fu.content) > 200 else fu.content,
+            'full_content': fu.content,
+            'created_at': fu.created_at.strftime('%B %d, %Y %I:%M %p'),
+            'created_by': fu.published_by,
+            'id': fu.id
+        })
+    
+    timeline.sort(key=lambda x: x['created_at'], reverse=True)
+    
+    return jsonify({
+        'resident_name': resident_name,
+        'total_documents': len(timeline),
+        'timeline': timeline
+    })
+
+@app.route("/api/residents", methods=["GET"])
+@login_required
+def get_residents():
+    residents = db.session.query(
+        Document.resident_name
+    ).filter(
+        Document.resident_name != None,
+        Document.resident_name != ''
+    ).distinct().order_by(Document.resident_name).all()
+    
+    return jsonify([r[0] for r in residents if r[0]])
+
+@app.route("/residents")
+@login_required
+def residents_page():
+    return render_template("residents.html")
+
 @app.errorhandler(429)
 def rate_limit_exceeded(e):
     return jsonify({"error": "Too many requests. Please wait a moment and try again."}), 429
