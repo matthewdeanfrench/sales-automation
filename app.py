@@ -35,6 +35,39 @@ class Document(db.Model):
             'content': self.content[:100] + '...' if len(self.content) > 100 else self.content,
             'created_at': self.created_at.strftime('%b %d, %Y %I:%M %p')
         }
+class ResidentCode(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    code = db.Column(db.String(20), unique=True, nullable=False)
+    resident_name = db.Column(db.String(100), nullable=False)
+    facility_name = db.Column(db.String(100))
+    created_by = db.Column(db.String(150))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    is_active = db.Column(db.Boolean, default=True)
+
+class FamilyUpdate(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    resident_code = db.Column(db.String(20), nullable=False)
+    resident_name = db.Column(db.String(100))
+    content = db.Column(db.Text, nullable=False)
+    published_by = db.Column(db.String(150))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'resident_name': self.resident_name,
+            'content': self.content,
+            'published_by': self.published_by,
+            'created_at': self.created_at.strftime('%B %d, %Y %I:%M %p')
+        }
+
+class FamilyUser(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(150), unique=True, nullable=False)
+    password = db.Column(db.String(256), nullable=False)
+    name = db.Column(db.String(100))
+    resident_code = db.Column(db.String(20), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 class AuditLog(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -606,6 +639,92 @@ def audit_log():
 @login_required
 def audit_page():
     return render_template("audit.html")
+
+@app.route("/family")
+def family_landing():
+    return render_template("family_login.html")
+
+@app.route("/family/portal")
+def family_portal():
+    return render_template("family_portal.html")
+
+@app.route("/api/family/register", methods=["POST"])
+def family_register():
+    data = request.json
+    if not data.get("email") or not data.get("password") or not data.get("name") or not data.get("resident_code"):
+        return jsonify({"error": "All fields required"}), 400
+    code = ResidentCode.query.filter_by(code=data["resident_code"].upper(), is_active=True).first()
+    if not code:
+        return jsonify({"error": "Invalid resident code. Please check with the facility."}), 400
+    if FamilyUser.query.filter_by(email=data["email"]).first():
+        return jsonify({"error": "Email already registered"}), 400
+    from werkzeug.security import generate_password_hash
+    user = FamilyUser(
+        email=data["email"],
+        password=generate_password_hash(data["password"]),
+        name=data["name"],
+        resident_code=data["resident_code"].upper()
+    )
+    db.session.add(user)
+    db.session.commit()
+    return jsonify({"success": True, "resident_name": code.resident_name})
+
+@app.route("/api/family/login", methods=["POST"])
+def family_login():
+    data = request.json
+    from werkzeug.security import check_password_hash
+    user = FamilyUser.query.filter_by(email=data.get("email")).first()
+    if not user or not check_password_hash(user.password, data.get("password", "")):
+        return jsonify({"error": "Invalid email or password"}), 401
+    code = ResidentCode.query.filter_by(code=user.resident_code).first()
+    resident_name = code.resident_name if code else "Your loved one"
+    return jsonify({"success": True, "name": user.name, "resident_name": resident_name, "resident_code": user.resident_code})
+
+@app.route("/api/family/updates/<resident_code>", methods=["GET"])
+def family_updates(resident_code):
+    updates = FamilyUpdate.query.filter_by(resident_code=resident_code.upper()).order_by(FamilyUpdate.created_at.desc()).limit(30).all()
+    return jsonify([u.to_dict() for u in updates])
+
+@app.route("/api/generate-resident-code", methods=["POST"])
+@login_required
+def generate_resident_code():
+    data = request.json
+    if not data.get("resident_name"):
+        return jsonify({"error": "Resident name required"}), 400
+    import random
+    import string
+    name_part = data["resident_name"].split()[0][:4].upper()
+    num_part = ''.join(random.choices(string.digits, k=4))
+    code = f"{name_part}-{num_part}"
+    resident_code = ResidentCode(
+        code=code,
+        resident_name=data["resident_name"],
+        facility_name=data.get("facility_name", ""),
+        created_by=current_user.email
+    )
+    db.session.add(resident_code)
+    db.session.commit()
+    return jsonify({"success": True, "code": code, "resident_name": data["resident_name"]})
+
+@app.route("/api/publish-family-update", methods=["POST"])
+@login_required
+def publish_family_update():
+    data = request.json
+    if not data.get("resident_code") or not data.get("content"):
+        return jsonify({"error": "Missing required fields"}), 400
+    code = ResidentCode.query.filter_by(code=data["resident_code"].upper()).first()
+    if not code:
+        return jsonify({"error": "Invalid resident code"}), 400
+    update = FamilyUpdate(
+        resident_code=data["resident_code"].upper(),
+        resident_name=code.resident_name,
+        content=data["content"],
+        published_by=current_user.email
+    )
+    db.session.add(update)
+    db.session.commit()
+    log_action("family_update_published", resource=data["resident_code"], details=f"Resident: {code.resident_name}")
+    return jsonify({"success": True})
 
 @app.errorhandler(429)
 def rate_limit_exceeded(e):
