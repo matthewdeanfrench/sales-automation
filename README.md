@@ -33,6 +33,11 @@ Enter a new resident's details and instantly generate a complete move-in
 package: personalized welcome letter, family checklist, and day one 
 schedule.
 
+### 🔮 Predictive Staffing AI (`staffing_predictor.py`)
+Analyzes historical call-out patterns and predicts staffing shortages before 
+they happen. Provides risk assessment, probability scores for each shift, 
+immediate action plans, and 30-day structural recommendations.
+
 ---
 
 ## Why I Built This
