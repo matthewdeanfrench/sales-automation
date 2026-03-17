@@ -131,7 +131,7 @@ def ask_claude(prompt):
     url = "https://api.anthropic.com/v1/messages"
     data = json.dumps({
         "model": "claude-sonnet-4-20250514",
-        "max_tokens": 2048,
+        "max_tokens": 4096,
         "messages": [{"role": "user", "content": prompt}]
     }).encode()
     req = urllib.request.Request(url, data=data, headers={
@@ -725,6 +725,50 @@ def publish_family_update():
     db.session.commit()
     log_action("family_update_published", resource=data["resident_code"], details=f"Resident: {code.resident_name}")
     return jsonify({"success": True})
+
+@app.route("/api/survey-prep", methods=["POST"])
+@login_required
+@limiter.limit("10 per minute")
+def survey_prep():
+    data = request.json
+    valid, error = validate(data, ["facility_name", "survey_type", "concerns"])
+    if not valid:
+        return jsonify({"error": error}), 400
+    prompt = f"""You are a senior living regulatory compliance expert with 20 years of experience preparing facilities for state surveys.
+
+Facility: {data['facility_name']}
+Survey type: {data['survey_type']}
+Areas of concern or recent issues: {data['concerns']}
+Additional context: {data.get('notes', 'None')}
+
+Generate a comprehensive survey preparation report:
+
+EXECUTIVE SUMMARY
+Overall readiness assessment and top 3 priority areas to address before the survey.
+
+HIGH-RISK F-TAGS TO REVIEW
+List the 10 most commonly cited F-tags for this type of facility/survey.
+For each: F-tag number, what it covers, what surveyors look for, and what to fix now.
+
+DOCUMENTATION AUDIT CHECKLIST
+Specific documents surveyors will request on day one.
+For each document: what it is, where it should be, what makes it compliant.
+
+MOCK SURVEY QUESTIONS
+10 questions surveyors are likely to ask staff.
+For each: the question, what they're really looking for, and the ideal response.
+
+IMMEDIATE ACTION ITEMS
+Things that must be fixed before surveyors arrive.
+Prioritized by risk level: Critical (fix today), High (fix this week), Medium (fix this month).
+
+STAFF TALKING POINTS
+What to tell staff before the survey arrives.
+What to say, what not to say, how to respond if asked about recent incidents.
+
+Format as a professional compliance report the Administrator can share with department heads."""
+
+    return jsonify({"result": ask_claude(prompt)})
 
 @app.errorhandler(429)
 def rate_limit_exceeded(e):

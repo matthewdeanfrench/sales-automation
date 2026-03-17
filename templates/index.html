@@ -118,6 +118,7 @@
         <div class="tab" onclick="showTab('careplan', this)">📄 Care Plan</div>
         <div class="tab" onclick="showTab('discharge', this)">🚪 Discharge</div>
         <div class="tab" onclick="showTab('staffing', this)">🔮 Staffing AI</div>
+        <div class="tab" onclick="showTab('survey', this)">📊 Survey Prep</div>
         <div class="tab" onclick="showTab('research', this)">🔍 Research</div>
     </div>
 
@@ -429,6 +430,46 @@
             </div>
         </div>
 
+<!-- Survey Prep -->
+        <div class="tool-panel" id="panel-survey">
+            <div class="card">
+                <div class="card-header">
+                    <h2>State Survey Prep</h2>
+                    <p>AI-powered preparation for state regulatory surveys — checklists, F-tags, mock questions, and action items.</p>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Facility Name <span class="required">*</span></label>
+                        <input type="text" id="sp-facility" placeholder="e.g. Sunrise Gardens" maxlength="100">
+                    </div>
+                    <div class="form-group">
+                        <label>Survey Type <span class="required">*</span></label>
+                        <input type="text" id="sp-type" placeholder="e.g. Annual, Complaint, Life Safety" maxlength="100">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Areas of Concern or Recent Issues <span class="required">*</span></label>
+                    <textarea id="sp-concerns" placeholder="e.g. Recent fall incidents, medication errors last quarter, staffing challenges, recent complaints..." maxlength="2000" oninput="updateCount(this, 'sp-count')"></textarea>
+                    <div class="char-count"><span id="sp-count">0</span> / 2000</div>
+                </div>
+                <div class="form-group">
+                    <label>Additional Context</label>
+                    <input type="text" id="sp-notes" placeholder="e.g. Last survey date, previous citations, census size" maxlength="300">
+                </div>
+                <button class="btn" onclick="runGenerate('survey-prep', {facility_name: val('sp-facility'), survey_type: val('sp-type'), concerns: val('sp-concerns'), notes: val('sp-notes')}, 'sp')">Generate Survey Prep Report</button>
+                <div class="loading" id="sp-loading"><div class="spinner"></div>Generating survey prep report...</div>
+                <div class="error-box" id="sp-error"></div>
+                <div class="output-box" id="sp-output-box">
+                    <div class="output-toolbar">
+                        <button class="tool-btn" onclick="copyOut('sp-content', this)">📋 Copy</button>
+                        <button class="tool-btn" onclick="window.print()">🖨️ Print</button>
+                        <button class="tool-btn" id="sp-save-btn" onclick="saveDoc('survey-prep', '', val('sp-facility'), 'sp-content', 'sp-save-btn')">💾 Save</button>
+                    </div>
+                    <div class="output-content" id="sp-content"></div>
+                </div>
+            </div>
+        </div>
+
         <!-- Research -->
         <div class="tool-panel" id="panel-research">
             <div class="card">
@@ -500,6 +541,7 @@
         'care-plan': d => `You are a Director of Nursing. Resident ${d.resident_name}, Diagnosis: ${d.diagnosis}, Care needs: ${d.care_needs}, Notes: ${d.notes || 'None'}. Generate CMS-compliant care plan with: MEDICAL DIAGNOSES, 90-DAY GOALS, NURSING INTERVENTIONS, DIETARY REQUIREMENTS, MOBILITY PLAN, PSYCHOSOCIAL NEEDS, SAFETY MEASURES, FAMILY COMMUNICATION PLAN.`,
         'discharge-summary': d => `You are a Director of Nursing. Resident ${d.resident_name} discharged to ${d.discharge_destination}. Stay summary: ${d.stay_summary}. Notes: ${d.notes || 'None'}. Generate: REASON FOR ADMISSION, SUMMARY OF STAY, HEALTH STATUS AT DISCHARGE, MEDICATIONS AT DISCHARGE, FOLLOW-UP CARE, INSTRUCTIONS FOR FAMILY, EMERGENCY CONTACTS.`,
         'staffing-predict': d => `You are a senior living workforce analytics expert. Facility: ${d.facility_name}. Staffing history: ${d.historical_data}. Analyze and provide: RISK ASSESSMENT (Critical/High/Medium/Low with explanation), PREDICTED SHORTAGE DAYS next 7 days with probability, PATTERN ANALYSIS, THREE IMMEDIATE ACTIONS for today, STAFF TO CONTACT NOW, ONE 30-DAY RECOMMENDATION. Format as operational report.`,
+        'survey-prep': d => `You are a senior living regulatory compliance expert. Facility: ${d.facility_name}. Survey type: ${d.survey_type}. Concerns: ${d.concerns}. Context: ${d.notes || 'None'}. Generate: EXECUTIVE SUMMARY, HIGH-RISK F-TAGS TO REVIEW (top 10 with what to fix), DOCUMENTATION AUDIT CHECKLIST, MOCK SURVEY QUESTIONS (10 questions with ideal responses), IMMEDIATE ACTION ITEMS (Critical/High/Medium priority), STAFF TALKING POINTS. Format as professional compliance report.`,
         'research': d => `I sell ClarityCare AI tools for senior living. I have a call with ${d.company}. Give me: COMPANY OVERVIEW, TOP 3 PAIN POINTS, THREE TAILORED TALKING POINTS, THREE DISCOVERY QUESTIONS, COMPETITIVE ANGLE, ONE SENTENCE OPENER.`
     };
 
