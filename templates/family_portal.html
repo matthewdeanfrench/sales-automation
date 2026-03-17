@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ClarityCare — Family Portal</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Georgia, serif; background: #f5f3ef; color: #2c2c2c; }
+
+        header {
+            background: #1a2f2a; color: white;
+            padding: 16px 40px;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .logo { display: flex; align-items: center; gap: 10px; }
+        .logo-icon { width: 32px; height: 32px; background: #7ec8a0; border-radius: 7px; display: flex; align-items: center; justify-content: center; font-size: 16px; color: #1a2f2a; }
+        .logo-text h1 { font-size: 18px; font-weight: 400; color: white; }
+        .logo-text span { font-size: 11px; opacity: 0.4; letter-spacing: 0.08em; text-transform: uppercase; }
+        .user-info { font-size: 13px; color: rgba(255,255,255,0.6); }
+        .logout-btn { background: transparent; border: 1px solid rgba(255,255,255,0.2); color: rgba(255,255,255,0.6); padding: 6px 14px; border-radius: 6px; font-size: 12px; cursor: pointer; font-family: Georgia, serif; margin-left: 16px; }
+        .logout-btn:hover { border-color: rgba(255,255,255,0.4); color: white; }
+
+        .resident-banner {
+            background: #1a2f2a;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding: 20px 40px;
+            text-align: center;
+        }
+        .resident-banner h2 { font-size: 22px; font-weight: 400; color: white; margin-bottom: 4px; }
+        .resident-banner p { font-size: 13px; color: rgba(255,255,255,0.5); }
+
+        .container { max-width: 720px; margin: 32px auto; padding: 0 20px; }
+
+        .update-card {
+            background: white; border-radius: 12px; padding: 28px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.06); margin-bottom: 20px;
+            border-left: 4px solid #7ec8a0;
+        }
+        .update-date { font-size: 12px; color: #aaa; margin-bottom: 12px; }
+        .update-content { font-size: 15px; line-height: 1.8; color: #2c2c2c; white-space: pre-wrap; }
+        .update-footer { margin-top: 16px; font-size: 12px; color: #bbb; }
+
+        .empty-state {
+            text-align: center; padding: 80px 20px;
+            background: white; border-radius: 12px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+        }
+        .empty-icon { font-size: 48px; margin-bottom: 16px; }
+        .empty-title { font-size: 20px; font-weight: 400; margin-bottom: 8px; color: #2c2c2c; }
+        .empty-text { font-size: 14px; color: #999; line-height: 1.6; }
+
+        .loading-state { text-align: center; padding: 60px; color: #aaa; font-size: 15px; font-style: italic; }
+
+        .page-header { margin-bottom: 24px; }
+        .page-header h2 { font-size: 22px; font-weight: 400; color: #2c2c2c; margin-bottom: 4px; }
+        .page-header p { font-size: 13px; color: #999; }
+
+        .badge { display: inline-block; background: #e8f5ee; color: #2c7a4e; padding: 3px 10px; border-radius: 20px; font-size: 11px; margin-bottom: 16px; }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="logo">
+        <div class="logo-icon">◈</div>
+        <div class="logo-text">
+            <h1>ClarityCare</h1>
+            <span>Family Portal</span>
+        </div>
+    </div>
+    <div style="display:flex;align-items:center;">
+        <span class="user-info" id="user-greeting">Welcome</span>
+        <button class="logout-btn" onclick="logout()">Sign Out</button>
+    </div>
+</header>
+
+<div class="resident-banner">
+    <h2 id="resident-name">Loading...</h2>
+    <p>Care updates from the team</p>
+</div>
+
+<div class="container">
+    <div class="page-header">
+        <h2>Recent Updates</h2>
+        <p>Messages from the care team about your loved one.</p>
+    </div>
+    <div id="updates-list">
+        <div class="loading-state">Loading updates...</div>
+    </div>
+</div>
+
+<script>
+    const user = JSON.parse(localStorage.getItem('family_user') || 'null');
+
+    if (!user || !user.success) {
+        window.location.href = '/family';
+    } else {
+        document.getElementById('user-greeting').textContent = `Hello, ${user.name}`;
+        document.getElementById('resident-name').textContent = user.resident_name;
+        loadUpdates();
+    }
+
+    async function loadUpdates() {
+        const list = document.getElementById('updates-list');
+        try {
+            const response = await fetch(`/api/family/updates/${user.resident_code}`);
+            const updates = await response.json();
+
+            if (updates.length === 0) {
+                list.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">💌</div>
+                        <div class="empty-title">No updates yet</div>
+                        <div class="empty-text">The care team will post updates here soon.<br>Check back tomorrow after your loved one's daily assessment.</div>
+                    </div>
+                `;
+                return;
+            }
+
+            list.innerHTML = updates.map(update => `
+                <div class="update-card">
+                    <div class="update-date">${update.created_at}</div>
+                    <div class="update-content">${update.content}</div>
+                    <div class="update-footer">From the care team at ${update.published_by ? update.published_by.split('@')[0] : 'your facility'}</div>
+                </div>
+            `).join('');
+        } catch {
+            list.innerHTML = '<div class="loading-state">Error loading updates. Please refresh.</div>';
+        }
+    }
+
+    function logout() {
+        localStorage.removeItem('family_user');
+        window.location.href = '/family';
+    }
+</script>
+
+</body>
+</html>
