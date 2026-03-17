@@ -850,6 +850,70 @@ CARE RECOMMENDATIONS:
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+@app.route("/dashboard")
+@login_required
+def dashboard():
+    return render_template("dashboard.html")
+
+@app.route("/api/dashboard-stats", methods=["GET"])
+@login_required
+def dashboard_stats():
+    try:
+        from sqlalchemy import func
+        
+        # Total documents
+        total_docs = Document.query.count()
+        
+        # Documents this week
+        from datetime import timedelta
+        week_ago = datetime.utcnow() - timedelta(days=7)
+        docs_this_week = Document.query.filter(Document.created_at >= week_ago).count()
+        
+        # Most used tools
+        tool_counts = db.session.query(
+            Document.tool,
+            func.count(Document.tool).label('count')
+        ).group_by(Document.tool).order_by(func.count(Document.tool).desc()).all()
+        
+        # Active users this week
+        active_users = db.session.query(
+            func.count(func.distinct(Document.user_email))
+        ).filter(Document.created_at >= week_ago).scalar()
+        
+        # Recent activity
+        recent = Document.query.order_by(Document.created_at.desc()).limit(10).all()
+        
+        # Audit log count
+        total_actions = AuditLog.query.count()
+        
+        # Family updates published
+        family_updates = FamilyUpdate.query.count()
+        
+        # Resident codes generated
+        resident_codes = ResidentCode.query.count()
+        
+        # Estimated time saved (avg 15 mins per document)
+        time_saved_hours = round((total_docs * 15) / 60, 1)
+        
+        return jsonify({
+            "total_docs": total_docs,
+            "docs_this_week": docs_this_week,
+            "active_users": active_users or 0,
+            "total_actions": total_actions,
+            "family_updates": family_updates,
+            "resident_codes": resident_codes,
+            "time_saved_hours": time_saved_hours,
+            "tool_counts": [{"tool": t, "count": c} for t, c in tool_counts],
+            "recent_activity": [{
+                "tool": d.tool,
+                "resident": d.resident_name or d.facility_name or "—",
+                "user": d.user_email,
+                "time": d.created_at.strftime("%b %d, %I:%M %p")
+            } for d in recent]
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 @app.errorhandler(429)
 def rate_limit_exceeded(e):
     return jsonify({"error": "Too many requests. Please wait a moment and try again."}), 429
