@@ -494,6 +494,50 @@ def stream():
                                headers={"Cache-Control": "no-cache",
                                         "X-Accel-Buffering": "no"})
 
+@app.route("/api/staffing-predict", methods=["POST"])
+@login_required
+@limiter.limit("10 per minute")
+def staffing_predict():
+    data = request.json
+    valid, error = validate(data, ["facility_name", "historical_data"])
+    if not valid:
+        return jsonify({"error": error}), 400
+    prompt = f"""You are an expert in senior living facility operations and workforce analytics.
+
+A facility manager at {data['facility_name']} has provided this staffing history:
+
+{data['historical_data']}
+
+Analyze this data and provide:
+
+RISK ASSESSMENT
+Overall staffing risk level for the next 7 days: Critical / High / Medium / Low
+Explain why in 2 sentences.
+
+PREDICTED SHORTAGE DAYS
+List specific days in the next 7 days with high call-out risk.
+For each day include: day, shift at risk, probability of shortage, reason.
+
+PATTERN ANALYSIS
+What patterns do you see in this data?
+- Day of week patterns
+- Shift patterns
+- Individual staff patterns
+
+IMMEDIATE ACTIONS
+3 specific things the manager should do TODAY to prevent shortages.
+Be concrete — who to call, what to offer, what policy to implement.
+
+STAFF TO CONTACT NOW
+Which types of staff should be contacted proactively and what to offer them.
+
+30-DAY RECOMMENDATION
+One structural change to prevent this pattern from recurring.
+
+Format as a clear operational report a facility manager can act on immediately."""
+
+    return jsonify({"result": ask_claude(prompt)})
+
 @app.route("/api/save-document", methods=["POST"])
 @login_required
 @limiter.limit("30 per minute")
