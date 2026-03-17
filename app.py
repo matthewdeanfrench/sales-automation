@@ -935,15 +935,17 @@ def update_profile():
 @app.route("/api/profile/signature", methods=["GET"])
 @login_required
 def get_signature():
-    user = db.session.get(type(current_user), current_user.id)
-    from datetime import datetime
-    sig = f"\n\n---\nElectronically signed by: {user.name}"
-    if hasattr(user, 'title') and user.title:
-        sig += f", {user.title}"
-    if hasattr(user, 'credentials') and user.credentials:
-        sig += f", {user.credentials}"
-    if hasattr(user, 'license_number') and user.license_number:
-        sig += f" | License #{user.license_number}"
+    user = User.query.get(current_user.id)
+    sig = f"\n\n---\nElectronically signed by: {user.name or 'Staff Member'}"
+    title = getattr(user, 'title', '')
+    credentials = getattr(user, 'credentials', '')
+    license_number = getattr(user, 'license_number', '')
+    if title:
+        sig += f", {title}"
+    if credentials:
+        sig += f", {credentials}"
+    if license_number:
+        sig += f" | License #{license_number}"
     sig += f"\nDate: {datetime.now().strftime('%B %d, %Y %I:%M %p')}"
     return jsonify({"signature": sig, "name": user.name})
 
