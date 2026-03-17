@@ -24,14 +24,35 @@ class Document(db.Model):
     content = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
+class AuditLog(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_email = db.Column(db.String(150))
+    action = db.Column(db.String(100), nullable=False)
+    resource = db.Column(db.String(100))
+    ip_address = db.Column(db.String(50))
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+    details = db.Column(db.Text)
+
     def to_dict(self):
         return {
             'id': self.id,
-            'tool': self.tool,
-            'resident_name': self.resident_name,
-            'facility_name': self.facility_name,
-            'content': self.content[:100] + '...' if len(self.content) > 100 else self.content,
-            'created_at': self.created_at.strftime('%b %d, %Y %I:%M %p')
+            'user_email': self.user_email,
+            'action': self.action,
+            'resource': self.resource,
+            'ip_address': self.ip_address,
+            'timestamp': self.timestamp.strftime('%b %d, %Y %I:%M %p'),
+            'details': self.details
+        }
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'user_email': self.user_email,
+            'action': self.action,
+            'resource': self.resource,
+            'ip_address': self.ip_address,
+            'timestamp': self.timestamp.strftime('%b %d, %Y %I:%M %p'),
+            'details': self.details
         }
 
 limiter = Limiter(
@@ -42,6 +63,22 @@ limiter = Limiter(
 )
 
 API_KEY = os.environ.get("ANTHROPIC_API_KEY")
+
+def log_action(action, resource=None, details=None):
+    try:
+        email = current_user.email if current_user.is_authenticated else "anonymous"
+        ip = request.environ.get('HTTP_X_FORWARDED_FOR', request.remote_addr)
+        log = AuditLog(
+            user_email=email,
+            action=action,
+            resource=resource,
+            ip_address=ip,
+            details=details
+        )
+        db.session.add(log)
+        db.session.commit()
+    except Exception:
+        pass
 
 def ask_claude(prompt):
     if not API_KEY:
@@ -460,6 +497,8 @@ def save_document():
     )
     db.session.add(doc)
     db.session.commit()
+    log_action("document_saved", resource=data.get("tool"), 
+               details=f"Resident: {data.get('resident_name', 'N/A')}")
     return jsonify({"success": True, "id": doc.id})
 
 @app.route("/api/documents", methods=["GET"])
@@ -485,9 +524,25 @@ def get_document(doc_id):
 @login_required
 def delete_document(doc_id):
     doc = Document.query.get_or_404(doc_id)
+    log_action("document_deleted", resource=doc.tool,
+               details=f"Resident: {doc.resident_name}, ID: {doc_id}")
     db.session.delete(doc)
     db.session.commit()
     return jsonify({"success": True})
+
+@app.route("/api/audit-log", methods=["GET"])
+@login_required
+def audit_log():
+    try:
+        logs = AuditLog.query.order_by(AuditLog.timestamp.desc()).limit(100).all()
+        return jsonify([l.to_dict() for l in logs])
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route("/audit")
+@login_required
+def audit_page():
+    return render_template("audit.html")
 
 @app.errorhandler(429)
 def rate_limit_exceeded(e):
