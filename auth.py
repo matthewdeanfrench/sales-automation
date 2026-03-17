@@ -16,6 +16,9 @@ def init_auth(app, db):
         name = db.Column(db.String(100))
         facility = db.Column(db.String(100))
         role = db.Column(db.String(20), default='staff')
+        credentials = db.Column(db.String(100), default='')
+        title = db.Column(db.String(100), default='')
+        license_number = db.Column(db.String(50), default='')
         created_at = db.Column(db.DateTime, default=db.func.now())
         is_active = db.Column(db.Boolean, default=True)
 

@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ClarityCare — My Profile</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Georgia, serif; background: #f5f3ef; color: #2c2c2c; }
+
+        header {
+            background: #1a2f2a; color: white;
+            padding: 16px 40px;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .logo { display: flex; align-items: center; gap: 10px; }
+        .logo-icon { width: 32px; height: 32px; background: #7ec8a0; border-radius: 7px; display: flex; align-items: center; justify-content: center; font-size: 16px; color: #1a2f2a; }
+        .logo-text h1 { font-size: 18px; font-weight: 400; color: white; }
+        .header-nav a { color: rgba(255,255,255,0.6); text-decoration: none; font-size: 13px; margin-left: 24px; }
+        .header-nav a:hover { color: white; }
+
+        .container { max-width: 600px; margin: 32px auto; padding: 0 20px; }
+
+        .btn-back { display: inline-block; background: #1a2f2a; color: white; text-decoration: none; padding: 10px 20px; border-radius: 8px; font-size: 13px; font-family: Georgia, serif; margin-bottom: 24px; }
+        .btn-back:hover { background: #111f1c; }
+
+        .card { background: white; border-radius: 12px; padding: 32px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); margin-bottom: 24px; }
+        .card-title { font-size: 20px; font-weight: 400; margin-bottom: 6px; }
+        .card-subtitle { font-size: 13px; color: #999; margin-bottom: 28px; }
+
+        .form-group { margin-bottom: 18px; }
+        label { display: block; font-size: 11px; color: #888; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.06em; }
+        input { width: 100%; padding: 10px 14px; border: 1px solid #e8e4de; border-radius: 8px; font-size: 14px; font-family: Georgia, serif; background: #fafaf8; color: #2c2c2c; transition: border 0.2s; }
+        input:focus { outline: none; border-color: #1a2f2a; background: white; }
+
+        .btn { background: #1a2f2a; color: white; border: none; padding: 11px 24px; border-radius: 8px; font-size: 14px; font-family: Georgia, serif; cursor: pointer; transition: background 0.2s; }
+        .btn:hover { background: #111f1c; }
+
+        .success-box { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 12px 16px; font-size: 13px; color: #16a34a; margin-top: 14px; display: none; }
+        .success-box.visible { display: block; }
+
+        .signature-preview {
+            background: #f9f8f6;
+            border: 1px solid #e8e4de;
+            border-radius: 8px;
+            padding: 16px;
+            font-size: 13px;
+            color: #555;
+            margin-top: 20px;
+            line-height: 1.7;
+            white-space: pre-wrap;
+        }
+        .signature-label { font-size: 11px; color: #aaa; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 8px; }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="logo">
+        <div class="logo-icon">◈</div>
+        <div class="logo-text"><h1>ClarityCare</h1></div>
+    </div>
+    <nav class="header-nav">
+        <a href="/app">Tools</a>
+        <a href="/dashboard">Dashboard</a>
+        <a href="/profile" style="color:white;">Profile</a>
+    </nav>
+</header>
+
+<div class="container">
+    <a href="/app" class="btn-back">← Back to Tools</a>
+
+    <div class="card">
+        <div class="card-title">My Profile</div>
+        <div class="card-subtitle">Set your credentials to automatically sign all generated documents.</div>
+
+        <div class="form-group">
+            <label>Full Name</label>
+            <input type="text" id="p-name" placeholder="e.g. Sarah Johnson">
+        </div>
+        <div class="form-group">
+            <label>Job Title</label>
+            <input type="text" id="p-title" placeholder="e.g. Registered Nurse, Director of Nursing, CNA">
+        </div>
+        <div class="form-group">
+            <label>Credentials</label>
+            <input type="text" id="p-credentials" placeholder="e.g. RN, LPN, CNA, DON">
+        </div>
+        <div class="form-group">
+            <label>License Number</label>
+            <input type="text" id="p-license" placeholder="e.g. CA-RN-123456">
+        </div>
+
+        <button class="btn" onclick="saveProfile()">Save Profile</button>
+        <div class="success-box" id="save-success">Profile saved! Your signature will appear on all generated documents.</div>
+
+        <div style="margin-top:28px;">
+            <div class="signature-label">Your signature preview</div>
+            <div class="signature-preview" id="sig-preview">Fill in your details above to see your signature preview.</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    async function loadProfile() {
+        try {
+            const response = await fetch('/api/auth/me');
+            const user = await response.json();
+            if (user.authenticated) {
+                document.getElementById('p-name').value = user.name || '';
+                updatePreview();
+            }
+        } catch {}
+    }
+
+    async function saveProfile() {
+        const name = document.getElementById('p-name').value.trim();
+        const title = document.getElementById('p-title').value.trim();
+        const credentials = document.getElementById('p-credentials').value.trim();
+        const license_number = document.getElementById('p-license').value.trim();
+
+        try {
+            const response = await fetch('/api/profile/update', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, title, credentials, license_number })
+            });
+            const result = await response.json();
+            if (result.success) {
+                document.getElementById('save-success').classList.add('visible');
+                updatePreview();
+                setTimeout(() => document.getElementById('save-success').classList.remove('visible'), 3000);
+            }
+        } catch {}
+    }
+
+    function updatePreview() {
+        const name = document.getElementById('p-name').value.trim() || '[Your Name]';
+        const title = document.getElementById('p-title').value.trim();
+        const credentials = document.getElementById('p-credentials').value.trim();
+        const license = document.getElementById('p-license').value.trim();
+        const now = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+
+        let sig = `---\nElectronically signed by: ${name}`;
+        if (title) sig += `, ${title}`;
+        if (credentials) sig += `, ${credentials}`;
+        if (license) sig += ` | License #${license}`;
+        sig += `\nDate: ${now}`;
+
+        document.getElementById('sig-preview').textContent = sig;
+    }
+
+    document.querySelectorAll('input').forEach(input => {
+        input.addEventListener('input', updatePreview);
+    });
+
+    loadProfile();
+</script>
+
+</body>
+</html>

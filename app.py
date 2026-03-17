@@ -914,6 +914,39 @@ def dashboard_stats():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+@app.route("/profile")
+@login_required
+def profile_page():
+    return render_template("profile.html")
+
+@app.route("/api/profile/update", methods=["POST"])
+@login_required
+def update_profile():
+    data = request.json
+    user = User.query.get(current_user.id)
+    if data.get("name"):
+        user.name = data["name"]
+    user.credentials = data.get("credentials", "")
+    user.license_number = data.get("license_number", "")
+    user.title = data.get("title", "")
+    db.session.commit()
+    return jsonify({"success": True})
+
+@app.route("/api/profile/signature", methods=["GET"])
+@login_required
+def get_signature():
+    user = db.session.get(type(current_user), current_user.id)
+    from datetime import datetime
+    sig = f"\n\n---\nElectronically signed by: {user.name}"
+    if hasattr(user, 'title') and user.title:
+        sig += f", {user.title}"
+    if hasattr(user, 'credentials') and user.credentials:
+        sig += f", {user.credentials}"
+    if hasattr(user, 'license_number') and user.license_number:
+        sig += f" | License #{user.license_number}"
+    sig += f"\nDate: {datetime.now().strftime('%B %d, %Y %I:%M %p')}"
+    return jsonify({"signature": sig, "name": user.name})
+
 @app.errorhandler(429)
 def rate_limit_exceeded(e):
     return jsonify({"error": "Too many requests. Please wait a moment and try again."}), 429
