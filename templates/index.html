@@ -17,13 +17,13 @@
         .logo-icon { width: 32px; height: 32px; background: #7ec8a0; border-radius: 7px; display: flex; align-items: center; justify-content: center; font-size: 16px; color: #1a2f2a; }
         .logo-text h1 { font-size: 18px; font-weight: 400; color: white; }
         .logo-text span { font-size: 11px; opacity: 0.4; letter-spacing: 0.08em; text-transform: uppercase; }
-        .header-nav a { color: rgba(255,255,255,0.6); text-decoration: none; font-size: 13px; margin-left: 24px; transition: color 0.2s; }
+        .header-nav a { color: rgba(255,255,255,0.6); text-decoration: none; font-size: 13px; margin-left: 20px; transition: color 0.2s; }
         .header-nav a:hover { color: white; }
         .header-nav a.active { color: #7ec8a0; }
 
         .tabs { display: flex; background: #111f1c; padding: 0 24px; overflow-x: auto; scrollbar-width: none; }
         .tabs::-webkit-scrollbar { display: none; }
-        .tab { padding: 12px 18px; cursor: pointer; color: rgba(255,255,255,0.5); font-size: 13px; border-bottom: 2px solid transparent; white-space: nowrap; transition: all 0.2s; user-select: none; }
+        .tab { padding: 12px 16px; cursor: pointer; color: rgba(255,255,255,0.5); font-size: 13px; border-bottom: 2px solid transparent; white-space: nowrap; transition: all 0.2s; user-select: none; }
         .tab:hover { color: rgba(255,255,255,0.8); }
         .tab.active { color: white; border-bottom-color: #7ec8a0; }
 
@@ -39,8 +39,8 @@
         .form-group { margin-bottom: 16px; }
         label { display: block; font-size: 11px; color: #888; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.06em; }
         .required { color: #e74c3c; }
-        input, textarea { width: 100%; padding: 10px 14px; border: 1px solid #e8e4de; border-radius: 8px; font-size: 14px; font-family: Georgia, serif; background: #fafaf8; transition: border 0.2s; color: #2c2c2c; }
-        input:focus, textarea:focus { outline: none; border-color: #1a2f2a; background: white; }
+        input, textarea, select { width: 100%; padding: 10px 14px; border: 1px solid #e8e4de; border-radius: 8px; font-size: 14px; font-family: Georgia, serif; background: #fafaf8; transition: border 0.2s; color: #2c2c2c; }
+        input:focus, textarea:focus, select:focus { outline: none; border-color: #1a2f2a; background: white; }
         textarea { min-height: 90px; resize: vertical; }
         .char-count { font-size: 11px; color: #bbb; margin-top: 4px; text-align: right; }
         .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
@@ -103,10 +103,10 @@
     </div>
     <nav class="header-nav">
         <a href="#" class="active" onclick="return showSection('tools', this)">Tools</a>
-        <a href="#" onclick="return showSection('history', this)">Saved Documents</a>
-        <a href="/dashboard" style="color:rgba(255,255,255,0.6)">Dashboard</a>
-        <a href="/profile" style="color:rgba(255,255,255,0.6)">Profile</a>
-        <a href="/audit" style="color:rgba(255,255,255,0.6)">Audit Log</a>
+        <a href="#" onclick="return showSection('history', this)">Saved</a>
+        <a href="/dashboard">Dashboard</a>
+        <a href="/profile">Profile</a>
+        <a href="/audit">Audit Log</a>
     </nav>
 </header>
 
@@ -160,6 +160,7 @@
                     <div class="output-toolbar">
                         <button class="tool-btn" onclick="copyOut('fu-content', this)">📋 Copy</button>
                         <button class="tool-btn" onclick="window.print()">🖨️ Print</button>
+                        <button class="tool-btn" onclick="addSignature('fu-content', this)">✍️ Sign</button>
                         <button class="tool-btn" id="fu-save-btn" onclick="saveDoc('family-update', val('fu-resident'), '', 'fu-content', 'fu-save-btn')">💾 Save</button>
                     </div>
                     <div class="output-content" id="fu-content"></div>
@@ -196,6 +197,7 @@
                     <div class="output-toolbar">
                         <button class="tool-btn" onclick="copyOut('ir-content', this)">📋 Copy</button>
                         <button class="tool-btn" onclick="window.print()">🖨️ Print</button>
+                        <button class="tool-btn" onclick="addSignature('ir-content', this)">✍️ Sign</button>
                         <button class="tool-btn" id="ir-save-btn" onclick="saveDoc('incident-report', val('ir-resident'), '', 'ir-content', 'ir-save-btn')">💾 Save</button>
                     </div>
                     <div class="output-content" id="ir-content"></div>
@@ -282,6 +284,7 @@
                     <div class="output-toolbar">
                         <button class="tool-btn" onclick="copyOut('mi-content', this)">📋 Copy</button>
                         <button class="tool-btn" onclick="window.print()">🖨️ Print</button>
+                        <button class="tool-btn" onclick="addSignature('mi-content', this)">✍️ Sign</button>
                         <button class="tool-btn" id="mi-save-btn" onclick="saveDoc('move-in', val('mi-resident'), val('mi-facility'), 'mi-content', 'mi-save-btn')">💾 Save</button>
                     </div>
                     <div class="output-content" id="mi-content"></div>
@@ -317,6 +320,7 @@
                     <div class="output-toolbar">
                         <button class="tool-btn" onclick="copyOut('ml-content', this)">📋 Copy</button>
                         <button class="tool-btn" onclick="window.print()">🖨️ Print</button>
+                        <button class="tool-btn" onclick="addSignature('ml-content', this)">✍️ Sign</button>
                         <button class="tool-btn" id="ml-save-btn" onclick="saveDoc('medication-log', val('ml-resident'), '', 'ml-content', 'ml-save-btn')">💾 Save</button>
                     </div>
                     <div class="output-content" id="ml-content"></div>
@@ -357,6 +361,7 @@
                     <div class="output-toolbar">
                         <button class="tool-btn" onclick="copyOut('cp-content', this)">📋 Copy</button>
                         <button class="tool-btn" onclick="window.print()">🖨️ Print</button>
+                        <button class="tool-btn" onclick="addSignature('cp-content', this)">✍️ Sign</button>
                         <button class="tool-btn" id="cp-save-btn" onclick="saveDoc('care-plan', val('cp-resident'), '', 'cp-content', 'cp-save-btn')">💾 Save</button>
                     </div>
                     <div class="output-content" id="cp-content"></div>
@@ -397,6 +402,7 @@
                     <div class="output-toolbar">
                         <button class="tool-btn" onclick="copyOut('ds-content', this)">📋 Copy</button>
                         <button class="tool-btn" onclick="window.print()">🖨️ Print</button>
+                        <button class="tool-btn" onclick="addSignature('ds-content', this)">✍️ Sign</button>
                         <button class="tool-btn" id="ds-save-btn" onclick="saveDoc('discharge-summary', val('ds-resident'), '', 'ds-content', 'ds-save-btn')">💾 Save</button>
                     </div>
                     <div class="output-content" id="ds-content"></div>
@@ -417,7 +423,7 @@
                 </div>
                 <div class="form-group">
                     <label>Staffing History <span class="required">*</span></label>
-                    <textarea id="sf-data" placeholder="Paste your call-out history, current staffing levels, known absences, patterns you've noticed..." maxlength="3000" oninput="updateCount(this, 'sf-count')" style="min-height:140px;"></textarea>
+                    <textarea id="sf-data" placeholder="Paste your call-out history, current staffing levels, known absences..." maxlength="3000" oninput="updateCount(this, 'sf-count')" style="min-height:140px;"></textarea>
                     <div class="char-count"><span id="sf-count">0</span> / 3000</div>
                 </div>
                 <button class="btn" onclick="runGenerate('staffing-predict', {facility_name: val('sf-facility'), historical_data: val('sf-data')}, 'sf')">Analyze & Predict</button>
@@ -434,51 +440,12 @@
             </div>
         </div>
 
-<!-- Risk Assessment -->
-        <div class="tool-panel" id="panel-risk">
-            <div class="card">
-                <div class="card-header">
-                    <h2>Resident Risk Assessment Agent</h2>
-                    <p>AI agent that makes 4 analysis passes to build a comprehensive clinical risk report. Takes 30-60 seconds.</p>
-                </div>
-                <div style="background:#fef3c7;border:1px solid #fcd34d;border-radius:8px;padding:12px 16px;margin-bottom:20px;font-size:13px;color:#92400e;">
-                    ⚡ This tool runs 4 AI analysis passes — allow 30-60 seconds for the complete report.
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Resident Name <span class="required">*</span></label>
-                        <input type="text" id="ra-resident" placeholder="e.g. Helen Martinez" maxlength="100">
-                    </div>
-                    <div class="form-group">
-                        <label>Facility Name</label>
-                        <input type="text" id="ra-facility" placeholder="e.g. Sunrise Gardens" maxlength="100">
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label>Resident Notes <span class="required">*</span></label>
-                    <textarea id="ra-notes" placeholder="e.g. Helen is 84, has type 2 diabetes and early dementia, fell twice last week, refuses medications sometimes, family visits rarely, seems withdrawn lately..." maxlength="2000" oninput="updateCount(this, 'ra-count')"></textarea>
-                    <div class="char-count"><span id="ra-count">0</span> / 2000</div>
-                </div>
-                <button class="btn" onclick="runRiskAssessment()">Run Risk Assessment</button>
-                <div class="loading" id="ra-loading"><div class="spinner"></div>Running 4-pass AI analysis... please wait 30-60 seconds...</div>
-                <div class="error-box" id="ra-error"></div>
-                <div class="output-box" id="ra-output-box">
-                    <div class="output-toolbar">
-                        <button class="tool-btn" onclick="copyOut('ra-content', this)">📋 Copy</button>
-                        <button class="tool-btn" onclick="window.print()">🖨️ Print</button>
-                        <button class="tool-btn" id="ra-save-btn" onclick="saveDoc('risk-assessment', val('ra-resident'), val('ra-facility'), 'ra-content', 'ra-save-btn')">💾 Save</button>
-                    </div>
-                    <div class="output-content" id="ra-content"></div>
-                </div>
-            </div>
-        </div>
-
-<!-- Survey Prep -->
+        <!-- Survey Prep -->
         <div class="tool-panel" id="panel-survey">
             <div class="card">
                 <div class="card-header">
                     <h2>State Survey Prep</h2>
-                    <p>AI-powered preparation for state regulatory surveys — checklists, F-tags, mock questions, and action items.</p>
+                    <p>AI-powered preparation for state regulatory surveys.</p>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
@@ -491,8 +458,8 @@
                     </div>
                 </div>
                 <div class="form-group">
-                    <label>Areas of Concern or Recent Issues <span class="required">*</span></label>
-                    <textarea id="sp-concerns" placeholder="e.g. Recent fall incidents, medication errors last quarter, staffing challenges, recent complaints..." maxlength="2000" oninput="updateCount(this, 'sp-count')"></textarea>
+                    <label>Areas of Concern <span class="required">*</span></label>
+                    <textarea id="sp-concerns" placeholder="e.g. Recent fall incidents, medication errors, staffing challenges..." maxlength="2000" oninput="updateCount(this, 'sp-count')"></textarea>
                     <div class="char-count"><span id="sp-count">0</span> / 2000</div>
                 </div>
                 <div class="form-group">
@@ -513,17 +480,56 @@
             </div>
         </div>
 
-<!-- Voice Notes -->
+        <!-- Risk Assessment -->
+        <div class="tool-panel" id="panel-risk">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Resident Risk Assessment Agent</h2>
+                    <p>AI agent that makes 4 analysis passes to build a comprehensive clinical risk report.</p>
+                </div>
+                <div style="background:#fef3c7;border:1px solid #fcd34d;border-radius:8px;padding:12px 16px;margin-bottom:20px;font-size:13px;color:#92400e;">
+                    ⚡ This tool runs 4 AI analysis passes — allow 30-60 seconds for the complete report.
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Resident Name <span class="required">*</span></label>
+                        <input type="text" id="ra-resident" placeholder="e.g. Helen Martinez" maxlength="100">
+                    </div>
+                    <div class="form-group">
+                        <label>Facility Name</label>
+                        <input type="text" id="ra-facility" placeholder="e.g. Sunrise Gardens" maxlength="100">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Resident Notes <span class="required">*</span></label>
+                    <textarea id="ra-notes" placeholder="e.g. Helen is 84, has type 2 diabetes and early dementia, fell twice last week..." maxlength="2000" oninput="updateCount(this, 'ra-count')"></textarea>
+                    <div class="char-count"><span id="ra-count">0</span> / 2000</div>
+                </div>
+                <button class="btn" onclick="runRiskAssessment()">Run Risk Assessment</button>
+                <div class="loading" id="ra-loading"><div class="spinner"></div>Running 4-pass AI analysis... please wait 30-60 seconds...</div>
+                <div class="error-box" id="ra-error"></div>
+                <div class="output-box" id="ra-output-box">
+                    <div class="output-toolbar">
+                        <button class="tool-btn" onclick="copyOut('ra-content', this)">📋 Copy</button>
+                        <button class="tool-btn" onclick="window.print()">🖨️ Print</button>
+                        <button class="tool-btn" onclick="addSignature('ra-content', this)">✍️ Sign</button>
+                        <button class="tool-btn" id="ra-save-btn" onclick="saveDoc('risk-assessment', val('ra-resident'), val('ra-facility'), 'ra-content', 'ra-save-btn')">💾 Save</button>
+                    </div>
+                    <div class="output-content" id="ra-content"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Voice Notes -->
         <div class="tool-panel" id="panel-voice">
             <div class="card">
                 <div class="card-header">
                     <h2>Voice to Documentation</h2>
                     <p>Speak your notes — AI converts them into a formal clinical document instantly.</p>
                 </div>
-
                 <div class="form-group">
                     <label>Document Type <span class="required">*</span></label>
-                    <select id="voice-doc-type" style="width:100%;padding:10px 14px;border:1px solid #e8e4de;border-radius:8px;font-size:14px;font-family:Georgia,serif;background:#fafaf8;color:#2c2c2c;">
+                    <select id="voice-doc-type">
                         <option value="care-note">Care Note</option>
                         <option value="incident">Incident Report</option>
                         <option value="family-update">Family Update</option>
@@ -531,19 +537,16 @@
                         <option value="behavior">Behavioral Observation</option>
                     </select>
                 </div>
-
                 <div class="form-group">
                     <label>Resident Name</label>
                     <input type="text" id="voice-resident" placeholder="e.g. Margaret Johnson" maxlength="100">
                 </div>
-
                 <div style="background:#f0f9ff;border:1px solid #bae6fd;border-radius:12px;padding:24px;text-align:center;margin-bottom:20px;">
                     <div id="voice-status" style="font-size:14px;color:#0369a1;margin-bottom:16px;">Click the microphone to start recording</div>
                     <button id="voice-btn" onclick="toggleRecording()" style="width:80px;height:80px;border-radius:50%;background:#1a2f2a;border:none;cursor:pointer;font-size:32px;transition:all 0.2s;display:flex;align-items:center;justify-content:center;margin:0 auto;">🎤</button>
                     <div id="voice-timer" style="font-size:24px;color:#1a2f2a;margin-top:12px;font-weight:400;display:none;">0:00</div>
                     <div id="voice-transcript" style="margin-top:16px;padding:12px;background:white;border-radius:8px;font-size:13px;color:#444;min-height:60px;text-align:left;border:1px solid #e8e4de;display:none;"></div>
                 </div>
-
                 <button class="btn" id="voice-generate-btn" onclick="generateFromVoice()" style="display:none;">Generate Document from Recording</button>
                 <div class="loading" id="voice-loading"><div class="spinner"></div>Converting speech to clinical document...</div>
                 <div class="error-box" id="voice-error"></div>
@@ -551,6 +554,7 @@
                     <div class="output-toolbar">
                         <button class="tool-btn" onclick="copyOut('voice-content', this)">📋 Copy</button>
                         <button class="tool-btn" onclick="window.print()">🖨️ Print</button>
+                        <button class="tool-btn" onclick="addSignature('voice-content', this)">✍️ Sign</button>
                         <button class="tool-btn" id="voice-save-btn" onclick="saveDoc('care-note', val('voice-resident'), '', 'voice-content', 'voice-save-btn')">💾 Save</button>
                     </div>
                     <div class="output-content" id="voice-content"></div>
@@ -680,7 +684,6 @@
         }
 
         const prompt = promptFn(data);
-
         loading.classList.add('visible');
         errorBox.classList.remove('visible');
         outputBox.classList.remove('visible');
@@ -730,57 +733,24 @@
         }
     }
 
-    async function saveDoc(tool, residentName, facilityName, contentId, btnId) {
-        const content = document.getElementById(contentId).textContent;
-        if (!content) return;
-        const btn = document.getElementById(btnId);
-        btn.textContent = 'Saving...';
+    async function addSignature(contentId, btn) {
         try {
-            const response = await fetch('/api/save-document', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ tool, resident_name: residentName, facility_name: facilityName, content })
-            });
+            const response = await fetch('/api/profile/signature');
             const result = await response.json();
-            if (result.success) { btn.textContent = '✅ Saved'; btn.classList.add('saved'); }
-        } catch { btn.textContent = '💾 Save'; }
-    }
-
-    async function loadHistory() {
-        const list = document.getElementById('history-list');
-        list.innerHTML = '<div class="history-empty">Loading...</div>';
-        try {
-            const response = await fetch('/api/documents');
-            const docs = await response.json();
-            if (docs.length === 0) {
-                list.innerHTML = '<div class="history-empty">No saved documents yet.</div>';
-                return;
+            const content = document.getElementById(contentId);
+            if (!content.textContent.includes('Electronically signed by')) {
+                content.textContent += result.signature;
+                btn.textContent = '✅ Signed';
+                btn.style.color = '#16a34a';
+            } else {
+                btn.textContent = '✅ Already signed';
             }
-            list.innerHTML = docs.map(doc => `
-                <div class="history-card" onclick="openDocument(${doc.id})">
-                    <div class="history-meta">
-                        <span class="history-tool">${doc.tool}</span>
-                        <span class="history-date">${doc.created_at}</span>
-                    </div>
-                    <div class="history-resident">${doc.resident_name || doc.facility_name || 'Document'}</div>
-                    <div class="history-preview">${doc.content}</div>
-                </div>
-            `).join('');
-        } catch { list.innerHTML = '<div class="history-empty">Error loading documents.</div>'; }
+        } catch {
+            btn.textContent = 'Set up profile first';
+        }
     }
 
-    async function openDocument(id) {
-        currentDocId = id;
-        try {
-            const response = await fetch(`/api/documents/${id}`);
-            const doc = await response.json();
-            document.getElementById('modal-title').textContent = `${doc.tool} — ${doc.resident_name || doc.facility_name || 'Document'}`;
-            document.getElementById('modal-content').textContent = doc.content;
-            document.getElementById('doc-modal').classList.add('visible');
-        } catch {}
-    }
-
-async function publishToFamily() {
+    async function publishToFamily() {
         const code = document.getElementById('fu-resident-code').value.trim().toUpperCase();
         const content = document.getElementById('fu-content').textContent;
         const status = document.getElementById('publish-status');
@@ -849,219 +819,54 @@ async function publishToFamily() {
         status.style.display = 'block';
     }
 
-let recognition = null;
-    let isRecording = false;
-    let transcript = '';
-    let timerInterval = null;
-    let seconds = 0;
-
-    function toggleRecording() {
-        if (isRecording) {
-            stopRecording();
-        } else {
-            startRecording();
-        }
-    }
-
-    function startRecording() {
-        if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-            document.getElementById('voice-error').textContent = 'Voice recording requires Chrome browser.';
-            document.getElementById('voice-error').classList.add('visible');
-            return;
-        }
-
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        recognition = new SpeechRecognition();
-        recognition.continuous = true;
-        recognition.interimResults = true;
-        recognition.lang = 'en-US';
-
-        transcript = '';
-        isRecording = true;
-        seconds = 0;
-
-        const btn = document.getElementById('voice-btn');
-        const status = document.getElementById('voice-status');
-        const timer = document.getElementById('voice-timer');
-        const transcriptDiv = document.getElementById('voice-transcript');
-        const generateBtn = document.getElementById('voice-generate-btn');
-
-        btn.style.background = '#dc2626';
-        btn.innerHTML = '⏹';
-        status.textContent = 'Recording... speak your notes clearly';
-        status.style.color = '#dc2626';
-        timer.style.display = 'block';
-        transcriptDiv.style.display = 'block';
-        generateBtn.style.display = 'none';
-
-        timerInterval = setInterval(() => {
-            seconds++;
-            const mins = Math.floor(seconds / 60);
-            const secs = seconds % 60;
-            timer.textContent = `${mins}:${secs.toString().padStart(2, '0')}`;
-        }, 1000);
-
-        recognition.onresult = (event) => {
-            let interim = '';
-            let final = '';
-            for (let i = event.resultIndex; i < event.results.length; i++) {
-                if (event.results[i].isFinal) {
-                    final += event.results[i][0].transcript + ' ';
-                } else {
-                    interim += event.results[i][0].transcript;
-                }
-            }
-            transcript += final;
-            transcriptDiv.textContent = transcript + interim;
-        };
-
-        recognition.onerror = (event) => {
-            document.getElementById('voice-error').textContent = `Recording error: ${event.error}. Try again.`;
-            document.getElementById('voice-error').classList.add('visible');
-            stopRecording();
-        };
-
-        recognition.start();
-    }
-
-    function stopRecording() {
-        isRecording = false;
-        if (recognition) recognition.stop();
-        if (timerInterval) clearInterval(timerInterval);
-
-        const btn = document.getElementById('voice-btn');
-        const status = document.getElementById('voice-status');
-        const generateBtn = document.getElementById('voice-generate-btn');
-
-        btn.style.background = '#1a2f2a';
-        btn.innerHTML = '🎤';
-
-        if (transcript.trim()) {
-            status.textContent = `Recording complete — ${seconds} seconds captured`;
-            status.style.color = '#16a34a';
-            generateBtn.style.display = 'block';
-        } else {
-            status.textContent = 'No speech detected. Try again.';
-            status.style.color = '#dc2626';
-        }
-    }
-
-    async function generateFromVoice() {
-        const docType = document.getElementById('voice-doc-type').value;
-        const resident = document.getElementById('voice-resident').value.trim();
-        const loading = document.getElementById('voice-loading');
-        const errorBox = document.getElementById('voice-error');
-        const outputBox = document.getElementById('voice-output-box');
-        const content = document.getElementById('voice-content');
-
-        if (!transcript.trim()) {
-            errorBox.textContent = 'No recording found. Please record first.';
-            errorBox.classList.add('visible');
-            return;
-        }
-
-        const docTypeLabels = {
-            'care-note': 'care note',
-            'incident': 'incident report',
-            'family-update': 'family update email',
-            'medication': 'medication administration note',
-            'behavior': 'behavioral observation note'
-        };
-
-        const prompt = `You are a senior living clinical documentation specialist.
-
-A caregiver spoke these notes about ${resident || 'a resident'}:
-"${transcript}"
-
-Convert this spoken note into a formal ${docTypeLabels[docType]} suitable for the medical record.
-Fix any speech-to-text errors, use proper clinical terminology, add structure and formatting.
-Make it professional and complete. Include date: ${new Date().toLocaleDateString()}.`;
-
-        loading.classList.add('visible');
-        errorBox.classList.remove('visible');
-        outputBox.classList.remove('visible');
-        content.textContent = '';
-
+    async function saveDoc(tool, residentName, facilityName, contentId, btnId) {
+        const content = document.getElementById(contentId).textContent;
+        if (!content) return;
+        const btn = document.getElementById(btnId);
+        btn.textContent = 'Saving...';
         try {
-            const response = await fetch('/api/stream', {
+            const response = await fetch('/api/save-document', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ prompt })
-            });
-
-            outputBox.classList.add('visible');
-            loading.classList.remove('visible');
-            outputBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-
-            const reader = response.body.getReader();
-            const decoder = new TextDecoder();
-            let buffer = '';
-
-            while (true) {
-                const { done, value } = await reader.read();
-                if (done) break;
-                buffer += decoder.decode(value, { stream: true });
-                const lines = buffer.split('\n');
-                buffer = lines.pop();
-                for (const line of lines) {
-                    if (line.startsWith('data:')) {
-                        const jsonStr = line.slice(5).trim();
-                        if (!jsonStr) continue;
-                        try {
-                            const event = JSON.parse(jsonStr);
-                            if (event.text) content.textContent += event.text;
-                        } catch {}
-                    }
-                }
-            }
-        } catch (err) {
-            loading.classList.remove('visible');
-            errorBox.textContent = 'Connection error. Please try again.';
-            errorBox.classList.add('visible');
-        }
-    }
-
-async function runRiskAssessment() {
-        const resident = val('ra-resident');
-        const notes = val('ra-notes');
-        const facility = val('ra-facility');
-        const loading = document.getElementById('ra-loading');
-        const errorBox = document.getElementById('ra-error');
-        const outputBox = document.getElementById('ra-output-box');
-        const content = document.getElementById('ra-content');
-
-        if (!resident || !notes) {
-            errorBox.textContent = 'Please fill in resident name and notes.';
-            errorBox.classList.add('visible');
-            return;
-        }
-
-        loading.classList.add('visible');
-        errorBox.classList.remove('visible');
-        outputBox.classList.remove('visible');
-        content.textContent = '';
-
-        try {
-            const response = await fetch('/api/risk-assessment', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ resident_name: resident, notes, facility_name: facility })
+                body: JSON.stringify({ tool, resident_name: residentName, facility_name: facilityName, content })
             });
             const result = await response.json();
-            if (result.error) {
-                errorBox.textContent = result.error;
-                errorBox.classList.add('visible');
-            } else {
-                content.textContent = result.result;
-                outputBox.classList.add('visible');
-                outputBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            if (result.success) { btn.textContent = '✅ Saved'; btn.classList.add('saved'); }
+        } catch { btn.textContent = '💾 Save'; }
+    }
+
+    async function loadHistory() {
+        const list = document.getElementById('history-list');
+        list.innerHTML = '<div class="history-empty">Loading...</div>';
+        try {
+            const response = await fetch('/api/documents');
+            const docs = await response.json();
+            if (docs.length === 0) {
+                list.innerHTML = '<div class="history-empty">No saved documents yet.</div>';
+                return;
             }
-        } catch (err) {
-            errorBox.textContent = 'Connection error. Please try again.';
-            errorBox.classList.add('visible');
-        } finally {
-            loading.classList.remove('visible');
-        }
+            list.innerHTML = docs.map(doc => `
+                <div class="history-card" onclick="openDocument(${doc.id})">
+                    <div class="history-meta">
+                        <span class="history-tool">${doc.tool}</span>
+                        <span class="history-date">${doc.created_at}</span>
+                    </div>
+                    <div class="history-resident">${doc.resident_name || doc.facility_name || 'Document'}</div>
+                    <div class="history-preview">${doc.content}</div>
+                </div>
+            `).join('');
+        } catch { list.innerHTML = '<div class="history-empty">Error loading documents.</div>'; }
+    }
+
+    async function openDocument(id) {
+        currentDocId = id;
+        try {
+            const response = await fetch(`/api/documents/${id}`);
+            const doc = await response.json();
+            document.getElementById('modal-title').textContent = `${doc.tool} — ${doc.resident_name || doc.facility_name || 'Document'}`;
+            document.getElementById('modal-content').textContent = doc.content;
+            document.getElementById('doc-modal').classList.add('visible');
+        } catch {}
     }
 
     function closeModal() {
@@ -1093,6 +898,169 @@ async function runRiskAssessment() {
     document.getElementById('doc-modal').addEventListener('click', function(e) {
         if (e.target === this) closeModal();
     });
+
+    // Voice recording
+    let recognition = null;
+    let isRecording = false;
+    let transcript = '';
+    let timerInterval = null;
+    let seconds = 0;
+
+    function toggleRecording() {
+        if (isRecording) { stopRecording(); } else { startRecording(); }
+    }
+
+    function startRecording() {
+        if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+            document.getElementById('voice-error').textContent = 'Voice recording requires Chrome browser.';
+            document.getElementById('voice-error').classList.add('visible');
+            return;
+        }
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        recognition = new SpeechRecognition();
+        recognition.continuous = true;
+        recognition.interimResults = true;
+        recognition.lang = 'en-US';
+        transcript = '';
+        isRecording = true;
+        seconds = 0;
+        const btn = document.getElementById('voice-btn');
+        const status = document.getElementById('voice-status');
+        const timer = document.getElementById('voice-timer');
+        const transcriptDiv = document.getElementById('voice-transcript');
+        const generateBtn = document.getElementById('voice-generate-btn');
+        btn.style.background = '#dc2626';
+        btn.innerHTML = '⏹';
+        status.textContent = 'Recording... speak your notes clearly';
+        status.style.color = '#dc2626';
+        timer.style.display = 'block';
+        transcriptDiv.style.display = 'block';
+        generateBtn.style.display = 'none';
+        timerInterval = setInterval(() => {
+            seconds++;
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            timer.textContent = `${mins}:${secs.toString().padStart(2, '0')}`;
+        }, 1000);
+        recognition.onresult = (event) => {
+            let interim = '';
+            let final = '';
+            for (let i = event.resultIndex; i < event.results.length; i++) {
+                if (event.results[i].isFinal) { final += event.results[i][0].transcript + ' '; }
+                else { interim += event.results[i][0].transcript; }
+            }
+            transcript += final;
+            transcriptDiv.textContent = transcript + interim;
+        };
+        recognition.onerror = (event) => {
+            document.getElementById('voice-error').textContent = `Recording error: ${event.error}. Try again.`;
+            document.getElementById('voice-error').classList.add('visible');
+            stopRecording();
+        };
+        recognition.start();
+    }
+
+    function stopRecording() {
+        isRecording = false;
+        if (recognition) recognition.stop();
+        if (timerInterval) clearInterval(timerInterval);
+        const btn = document.getElementById('voice-btn');
+        const status = document.getElementById('voice-status');
+        const generateBtn = document.getElementById('voice-generate-btn');
+        btn.style.background = '#1a2f2a';
+        btn.innerHTML = '🎤';
+        if (transcript.trim()) {
+            status.textContent = `Recording complete — ${seconds} seconds captured`;
+            status.style.color = '#16a34a';
+            generateBtn.style.display = 'block';
+        } else {
+            status.textContent = 'No speech detected. Try again.';
+            status.style.color = '#dc2626';
+        }
+    }
+
+    async function generateFromVoice() {
+        const docType = document.getElementById('voice-doc-type').value;
+        const resident = document.getElementById('voice-resident').value.trim();
+        const loading = document.getElementById('voice-loading');
+        const errorBox = document.getElementById('voice-error');
+        const outputBox = document.getElementById('voice-output-box');
+        const content = document.getElementById('voice-content');
+        if (!transcript.trim()) {
+            errorBox.textContent = 'No recording found. Please record first.';
+            errorBox.classList.add('visible');
+            return;
+        }
+        const docTypeLabels = { 'care-note': 'care note', 'incident': 'incident report', 'family-update': 'family update email', 'medication': 'medication administration note', 'behavior': 'behavioral observation note' };
+        const prompt = `You are a senior living clinical documentation specialist. A caregiver spoke these notes about ${resident || 'a resident'}: "${transcript}". Convert this spoken note into a formal ${docTypeLabels[docType]} suitable for the medical record. Fix any speech-to-text errors, use proper clinical terminology, add structure and formatting. Make it professional and complete. Include date: ${new Date().toLocaleDateString()}.`;
+        loading.classList.add('visible');
+        errorBox.classList.remove('visible');
+        outputBox.classList.remove('visible');
+        content.textContent = '';
+        try {
+            const response = await fetch('/api/stream', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ prompt }) });
+            outputBox.classList.add('visible');
+            loading.classList.remove('visible');
+            outputBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+            let buffer = '';
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+                buffer += decoder.decode(value, { stream: true });
+                const lines = buffer.split('\n');
+                buffer = lines.pop();
+                for (const line of lines) {
+                    if (line.startsWith('data:')) {
+                        const jsonStr = line.slice(5).trim();
+                        if (!jsonStr) continue;
+                        try { const event = JSON.parse(jsonStr); if (event.text) content.textContent += event.text; } catch {}
+                    }
+                }
+            }
+        } catch (err) {
+            loading.classList.remove('visible');
+            errorBox.textContent = 'Connection error. Please try again.';
+            errorBox.classList.add('visible');
+        }
+    }
+
+    async function runRiskAssessment() {
+        const resident = val('ra-resident');
+        const notes = val('ra-notes');
+        const facility = val('ra-facility');
+        const loading = document.getElementById('ra-loading');
+        const errorBox = document.getElementById('ra-error');
+        const outputBox = document.getElementById('ra-output-box');
+        const content = document.getElementById('ra-content');
+        if (!resident || !notes) {
+            errorBox.textContent = 'Please fill in resident name and notes.';
+            errorBox.classList.add('visible');
+            return;
+        }
+        loading.classList.add('visible');
+        errorBox.classList.remove('visible');
+        outputBox.classList.remove('visible');
+        content.textContent = '';
+        try {
+            const response = await fetch('/api/risk-assessment', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ resident_name: resident, notes, facility_name: facility }) });
+            const result = await response.json();
+            if (result.error) {
+                errorBox.textContent = result.error;
+                errorBox.classList.add('visible');
+            } else {
+                content.textContent = result.result;
+                outputBox.classList.add('visible');
+                outputBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+        } catch (err) {
+            errorBox.textContent = 'Connection error. Please try again.';
+            errorBox.classList.add('visible');
+        } finally {
+            loading.classList.remove('visible');
+        }
+    }
 </script>
 
 </body>
