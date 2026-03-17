@@ -18,11 +18,23 @@ db = SQLAlchemy(app)
 
 class Document(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    user_email = db.Column(db.String(150))
     tool = db.Column(db.String(50), nullable=False)
     resident_name = db.Column(db.String(100))
     facility_name = db.Column(db.String(100))
     content = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'user_email': self.user_email,
+            'tool': self.tool,
+            'resident_name': self.resident_name,
+            'facility_name': self.facility_name,
+            'content': self.content[:100] + '...' if len(self.content) > 100 else self.content,
+            'created_at': self.created_at.strftime('%b %d, %Y %I:%M %p')
+        }
 
 class AuditLog(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -490,6 +502,7 @@ def save_document():
     if not data.get("content") or not data.get("tool"):
         return jsonify({"error": "Missing required fields"}), 400
     doc = Document(
+        user_email=current_user.email,
         tool=data.get("tool"),
         resident_name=data.get("resident_name", ""),
         facility_name=data.get("facility_name", ""),
@@ -504,7 +517,10 @@ def save_document():
 @app.route("/api/documents", methods=["GET"])
 @login_required
 def get_documents():
-    docs = Document.query.order_by(Document.created_at.desc()).limit(50).all()
+    if current_user.is_admin:
+        docs = Document.query.order_by(Document.created_at.desc()).limit(50).all()
+    else:
+        docs = Document.query.filter_by(user_email=current_user.email).order_by(Document.created_at.desc()).limit(50).all()
     return jsonify([d.to_dict() for d in docs])
 
 @app.route("/api/documents/<int:doc_id>", methods=["GET"])
@@ -534,7 +550,10 @@ def delete_document(doc_id):
 @login_required
 def audit_log():
     try:
-        logs = AuditLog.query.order_by(AuditLog.timestamp.desc()).limit(100).all()
+        if current_user.is_admin:
+            logs = AuditLog.query.order_by(AuditLog.timestamp.desc()).limit(100).all()
+        else:
+            logs = AuditLog.query.filter_by(user_email=current_user.email).order_by(AuditLog.timestamp.desc()).limit(100).all()
         return jsonify([l.to_dict() for l in logs])
     except Exception as e:
         return jsonify({"error": str(e)}), 500

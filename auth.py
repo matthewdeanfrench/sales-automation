@@ -1,6 +1,5 @@
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
-from flask_sqlalchemy import SQLAlchemy
 from flask import Blueprint, request, jsonify, render_template, redirect, url_for
 
 auth_bp = Blueprint('auth', __name__)
@@ -16,6 +15,7 @@ def init_auth(app, db):
         password = db.Column(db.String(256), nullable=False)
         name = db.Column(db.String(100))
         facility = db.Column(db.String(100))
+        role = db.Column(db.String(20), default='staff')
         created_at = db.Column(db.DateTime, default=db.func.now())
         is_active = db.Column(db.Boolean, default=True)
 
@@ -29,6 +29,10 @@ def init_auth(app, db):
         @property
         def is_anonymous(self):
             return False
+
+        @property
+        def is_admin(self):
+            return self.role == 'admin'
 
     @login_manager.user_loader
     def load_user(user_id):
@@ -53,7 +57,8 @@ def init_auth(app, db):
             email=data['email'],
             password=generate_password_hash(data['password']),
             name=data['name'],
-            facility=data.get('facility', '')
+            facility=data.get('facility', ''),
+            role='staff'
         )
         db.session.add(user)
         db.session.commit()
@@ -84,7 +89,8 @@ def init_auth(app, db):
                 'authenticated': True,
                 'name': current_user.name,
                 'email': current_user.email,
-                'facility': current_user.facility
+                'facility': current_user.facility,
+                'role': current_user.role
             })
         return jsonify({'authenticated': False})
 
