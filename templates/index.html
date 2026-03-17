@@ -130,6 +130,15 @@
                     <h2>Family Update Generator</h2>
                     <p>Turn rough caregiver notes into a warm, professional family email in seconds.</p>
                 </div>
+                <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:14px 16px;margin-bottom:20px;">
+                    <div style="font-size:12px;color:#166534;font-weight:500;margin-bottom:8px;">📱 Publish to Family Portal</div>
+                    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+                        <input type="text" id="fu-resident-code" placeholder="Resident code e.g. MARG-8856" style="flex:1;min-width:180px;padding:8px 12px;border:1px solid #bbf7d0;border-radius:6px;font-size:13px;background:white;">
+                        <button class="tool-btn" style="background:#16a34a;color:white;border-color:#16a34a;" onclick="publishToFamily()">Publish Update</button>
+                        <button class="tool-btn" onclick="generateCode()">Generate New Code</button>
+                    </div>
+                    <div id="publish-status" style="font-size:12px;margin-top:8px;display:none;"></div>
+                </div>
                 <div class="form-group">
                     <label>Resident Name <span class="required">*</span></label>
                     <input type="text" id="fu-resident" placeholder="e.g. Margaret Johnson" maxlength="100">
@@ -639,6 +648,75 @@
             document.getElementById('modal-content').textContent = doc.content;
             document.getElementById('doc-modal').classList.add('visible');
         } catch {}
+    }
+
+async function publishToFamily() {
+        const code = document.getElementById('fu-resident-code').value.trim().toUpperCase();
+        const content = document.getElementById('fu-content').textContent;
+        const status = document.getElementById('publish-status');
+
+        if (!code) {
+            status.textContent = 'Please enter a resident code first.';
+            status.style.color = '#c0392b';
+            status.style.display = 'block';
+            return;
+        }
+        if (!content) {
+            status.textContent = 'Please generate an update first, then publish.';
+            status.style.color = '#c0392b';
+            status.style.display = 'block';
+            return;
+        }
+
+        try {
+            const response = await fetch('/api/publish-family-update', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ resident_code: code, content })
+            });
+            const result = await response.json();
+            if (result.success) {
+                status.textContent = '✅ Published to family portal successfully!';
+                status.style.color = '#16a34a';
+            } else {
+                status.textContent = result.error || 'Error publishing update.';
+                status.style.color = '#c0392b';
+            }
+        } catch {
+            status.textContent = 'Connection error. Please try again.';
+            status.style.color = '#c0392b';
+        }
+        status.style.display = 'block';
+    }
+
+    async function generateCode() {
+        const resident = document.getElementById('fu-resident').value.trim();
+        const status = document.getElementById('publish-status');
+
+        if (!resident) {
+            status.textContent = 'Please enter a resident name first.';
+            status.style.color = '#c0392b';
+            status.style.display = 'block';
+            return;
+        }
+
+        try {
+            const response = await fetch('/api/generate-resident-code', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ resident_name: resident })
+            });
+            const result = await response.json();
+            if (result.success) {
+                document.getElementById('fu-resident-code').value = result.code;
+                status.textContent = `✅ Code generated: ${result.code} — Share this with the family at move-in.`;
+                status.style.color = '#16a34a';
+            }
+        } catch {
+            status.textContent = 'Error generating code.';
+            status.style.color = '#c0392b';
+        }
+        status.style.display = 'block';
     }
 
     function closeModal() {
